@@ -12,7 +12,6 @@ class HomePage extends StatelessWidget {
         children: [
           const HeaderWidget(),
           CarrouselWidget(),
-          //const Expanded(child: Center(child: Text('contenu'))),
         ],
       ),
     );

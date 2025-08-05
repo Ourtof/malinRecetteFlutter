@@ -12,7 +12,6 @@ class CarrouselWidget extends StatelessWidget {
       int viewId,
     ) {
       final web.HTMLIFrameElement frame = web.HTMLIFrameElement()
-        //..src = '${_htmlBasePath()}carrousel.html'
         ..src = '/html/carrousel.html'
         ..style.border = 'none'
         ..style.width = '100%'
@@ -20,12 +19,6 @@ class CarrouselWidget extends StatelessWidget {
       return frame;
     });
   }
-
-  /*static String _htmlBasePath() {
-    final uri = Uri.base;
-    final path = uri.path.endsWith('/') ? uri.path : '${uri.path}/';
-    return '$path/html/';
-  }*/
 
   @override
   Widget build(BuildContext context) {
