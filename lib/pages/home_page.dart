@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/ui/widget/carrousel_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header_widget.dart';
 
 class HomePage extends StatelessWidget {
@@ -8,9 +9,10 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: const [
-          HeaderWidget(),
-          Expanded(child: Center(child: Text('contenu'))),
+        children: [
+          const HeaderWidget(),
+          CarrouselWidget(),
+          //const Expanded(child: Center(child: Text('contenu'))),
         ],
       ),
     );
