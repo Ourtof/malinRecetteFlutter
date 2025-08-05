@@ -11,12 +11,18 @@ class HeaderWidget extends StatelessWidget {
       height: screenHeight * 0.10,
       width: double.infinity,
       child: Container(
-        color: Colors.green,
+        color: const Color(0xFF708D81),
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset('assets/logo.png', height: screenHeight * 0.06),
+            Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: Image.asset(
+                'assets/img/logo_transparent.png',
+                height: screenHeight * 0.06,
+              ),
+            ),
             Row(
               children: const [
                 SizedBox(width: 16),
