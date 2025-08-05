@@ -25,18 +25,20 @@ class HeaderWidget extends StatelessWidget {
               ),
             ),
             Row(
-              children: const [
-                SizedBox(width: 16),
+              children: [
+                SizedBox(width: 24),
                 Text(
                   'Accueil',
                   style: TextStyle(color: Colors.black, fontSize: 18),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: 24),
                 Text(
                   'À propos',
                   style: TextStyle(color: Colors.black, fontSize: 18),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: 24),
+                Icon(Icons.account_circle, color: Colors.black),
+                SizedBox(width: 24),
               ],
             ),
           ],
