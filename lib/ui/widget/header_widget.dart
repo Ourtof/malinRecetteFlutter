@@ -21,7 +21,7 @@ class HeaderWidget extends StatelessWidget {
               padding: const EdgeInsets.only(left: 32),
               child: Image.asset(
                 'assets/img/logo_transparent.png',
-                height: screenHeight * 0.06,
+                height: screenHeight * 0.08,
               ),
             ),
             Row(
