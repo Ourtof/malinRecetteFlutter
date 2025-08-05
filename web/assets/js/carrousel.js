@@ -10,7 +10,6 @@ for (let i = 0; i < imageCount.length; i++) {
     let img = document.createElement('img');
     div.append(img);
     img.src = '/assets/img/home' + (i + 1) + '.jpg'
-    //img.src = '../assets/img/home' + (i + 1) + '.jpg'
     panneau.append(div);
 }
 
