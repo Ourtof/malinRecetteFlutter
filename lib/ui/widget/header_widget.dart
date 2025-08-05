@@ -33,6 +33,11 @@ class HeaderWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 24),
                 Text(
+                  'Recettes',
+                  style: TextStyle(color: Colors.black, fontSize: 18),
+                ),
+                SizedBox(width: 24),
+                Text(
                   'À propos',
                   style: TextStyle(color: Colors.black, fontSize: 18),
                 ),
