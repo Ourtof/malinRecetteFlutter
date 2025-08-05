@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 
 class HeaderWidget extends StatelessWidget {
   const HeaderWidget({super.key});
@@ -11,7 +12,7 @@ class HeaderWidget extends StatelessWidget {
       height: screenHeight * 0.10,
       width: double.infinity,
       child: Container(
-        color: const Color(0xFF708D81),
+        color: AppColors.primary80,
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
