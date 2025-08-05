@@ -15,7 +15,7 @@ class CarrouselWidget extends StatelessWidget {
         ..src = '/html/carrousel.html'
         ..style.border = 'none'
         ..style.width = '100%'
-        ..style.height = '100vh';
+        ..style.height = '80vh';
       return frame;
     });
   }
