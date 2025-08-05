@@ -37,10 +37,6 @@ class HeaderWidget extends StatelessWidget {
                   style: TextStyle(color: Colors.black, fontSize: 18),
                 ),
                 SizedBox(width: 16),
-                Text(
-                  'Contact',
-                  style: TextStyle(color: Colors.black, fontSize: 18),
-                ),
               ],
             ),
           ],
