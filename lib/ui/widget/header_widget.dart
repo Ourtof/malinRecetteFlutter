@@ -42,7 +42,14 @@ class HeaderWidget extends StatelessWidget {
                   style: TextStyle(color: Colors.black, fontSize: 18),
                 ),
                 SizedBox(width: 24),
-                Icon(Icons.account_circle, color: Colors.black),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/login');
+                  },
+                  //TODO: faire en sorte à ce que les liens en haut cliquables, il y ai un effet visuel ou de souris
+                  child: const Icon(Icons.account_circle, color: Colors.black),
+                ),
+                //Icon(Icons.account_circle, color: Colors.black),
                 SizedBox(width: 24),
               ],
             ),
