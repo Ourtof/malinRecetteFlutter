@@ -11,11 +11,11 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          const HeaderWidget(), // 👈 hauteur fixe obligatoire
+          const HeaderWidget(),
           Expanded(
             child: Container(
               width: double.infinity,
-              color: Colors.white, // optionnel : pour voir la zone
+              color: Colors.white, // optionnel : pour voir la zone / TODO: vérifier si nécessaire
               child: CarrouselWidget(),
             ),
           ),
