@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/pages/Profile_page.dart';
+import 'package:malinrecetteflutter/pages/profile_page.dart';
 import 'package:malinrecetteflutter/pages/home_page.dart';
 import 'package:malinrecetteflutter/pages/login_page.dart';
 import 'package:malinrecetteflutter/pages/register_page.dart';

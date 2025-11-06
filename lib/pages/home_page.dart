@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/carrousel_widget.dart';
-import 'package:malinrecetteflutter/ui/widget/header_bar.dart';
-import 'package:malinrecetteflutter/ui/widget/footer_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

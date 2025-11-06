@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
-import 'package:malinrecetteflutter/ui/widget/header_content.dart';
+import 'package:malinrecetteflutter/ui/widget/header/header_content.dart';
 
 class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
