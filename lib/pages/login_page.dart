@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/ui/widget/header_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/header_content.dart';
+import 'package:malinrecetteflutter/ui/widget/footer_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   String? message;
 
   Future<void> login() async {
-    // http.Client() => Prépare l’app pour les tests, perf, évolutions
     final client = http.Client();
     try {
       final response = await client.post(
@@ -37,8 +39,6 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
           message = 'Connexion réussie. Token : $token';
         });
-
-        // TODO : stocker le token et rediriger
       } else {
         setState(() {
           message = 'Erreur : ${response.statusCode} - ${response.body}';
@@ -56,7 +56,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: const HeaderBar(height: 88),
+      bottomNavigationBar: const FooterWidget(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
