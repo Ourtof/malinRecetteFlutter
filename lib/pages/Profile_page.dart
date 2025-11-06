@@ -31,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final response = await http.get(
       Uri.parse(
-        'http://127.0.0.1:8000/api/me',
+        'http://127.0.0.1:8000/api/user',
       ), //TODO: À adapter selon l'IP réelle
       headers: {'Authorization': 'Bearer $token'},
     );
@@ -45,16 +45,34 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
+
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil utilisateur')),
+      appBar: AppBar(
+        title: const Text('Profil utilisateur'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Déconnexion',
+            onPressed: () {},
+            //onPressed: logout,
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: error != null
             ? Text(error!, style: const TextStyle(color: Colors.red))
             : user == null
-            ? const CircularProgressIndicator()
+            ? const Center(child: CircularProgressIndicator())
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
