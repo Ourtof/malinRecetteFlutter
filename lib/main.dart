@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/pages/Profile_page.dart';
 import 'package:malinrecetteflutter/pages/home_page.dart';
 import 'package:malinrecetteflutter/pages/login_page.dart';
 import 'package:malinrecetteflutter/pages/register_page.dart';
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        scaffoldBackgroundColor: AppColors.neutral20,
       ),
       initialRoute: '/',
       routes: {
@@ -25,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/home_page': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }
