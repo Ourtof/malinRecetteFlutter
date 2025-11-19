@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,7 +21,9 @@ class _LoginPageState extends State<LoginPage> {
     final client = http.Client();
     try {
       final response = await client.post(
-        Uri.parse('http://127.0.0.1:8000/api/login'), // TODO: vérifier l'ip, la remplacer !
+        Uri.parse(
+          'https://127.0.0.1:8000/api/login',
+        ), // TODO: vérifier l'ip, la remplacer !
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': emailController.text,
@@ -32,11 +34,13 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final token = data['token'];
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('jwt_token', token);
+        await AuthService.saveToken(token); // Gère le stockage
 
         setState(() {
-          message = 'Connexion réussie. Token : $token';
+          message = 'Connexion réussie.';
+        });
+        Future.microtask(() {
+          Navigator.of(context).pushReplacementNamed('/home_page');
         });
       } else {
         setState(() {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
 
 class HeaderContent extends StatelessWidget {
   const HeaderContent({super.key});
@@ -47,7 +47,12 @@ class HeaderContent extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               InkWell(
-                onTap: () => Navigator.of(context).pushNamed('/login'),
+                onTap: () async {
+                  final isLogged = await AuthService.isLoggedIn();
+                  Navigator.of(
+                    context,
+                  ).pushNamed(isLogged ? '/profile' : '/login');
+                },
                 mouseCursor: SystemMouseCursors.click,
                 borderRadius: BorderRadius.circular(8),
                 child: const Padding(

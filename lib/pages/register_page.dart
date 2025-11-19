@@ -16,7 +16,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final pseudoController = TextEditingController();
   final prenomController = TextEditingController();
   final nomController = TextEditingController();
-  final dateNaissanceController = TextEditingController();
   final adresseController = TextEditingController();
   final villeController = TextEditingController();
   final codePostalController = TextEditingController();
@@ -28,7 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final response = await client.post(
         Uri.parse(
-          'http://127.0.0.1:8000/api/register',
+          'https://127.0.0.1:8000/api/register',
         ), //TODO: pareil que login pour l'ip
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -37,10 +36,9 @@ class _RegisterPageState extends State<RegisterPage> {
           'pseudo': pseudoController.text,
           'prenom': prenomController.text,
           'nom': nomController.text,
-          'date_naissance': dateNaissanceController.text,
           'adresse': adresseController.text,
           'ville': villeController.text,
-          'code_postal': codePostalController.text,
+          'codePostal': codePostalController.text,
         }),
       );
 
@@ -82,7 +80,6 @@ class _RegisterPageState extends State<RegisterPage> {
               _input(pseudoController, 'Pseudo'),
               _input(prenomController, 'Prénom'),
               _input(nomController, 'Nom'),
-              _input(dateNaissanceController, 'Date de naissance (YYYY-MM-DD)'),
               _input(adresseController, 'Adresse'),
               _input(villeController, 'Ville'),
               _input(
