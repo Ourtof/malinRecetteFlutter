@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await client.post(
         Uri.parse(
-          'https://127.0.0.1:8000/api/login',
+          'http://127.0.0.1:8000/api/login',
         ), // TODO: vérifier l'ip, la remplacer !
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
