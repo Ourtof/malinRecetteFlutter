@@ -58,12 +58,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profil utilisateur'),
-        actions: [
+        actions: [  
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Déconnexion',
-            onPressed: () {},
-            //onPressed: logout,
+            onPressed: logout,
           ),
         ],
       ),
@@ -77,8 +76,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Email : ${user!['email']}"),
-                  Text("Nom : ${user!['nom']}"),
                   Text("Prénom : ${user!['prenom']}"),
+                  Text("Nom : ${user!['nom']}"),
+                  Text("Pseudo : ${user!['pseudo']}"),
                   //TODO: vérifier si d'autres champs sont nécessaires
                 ],
               ),
