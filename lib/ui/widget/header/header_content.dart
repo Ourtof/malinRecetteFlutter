@@ -16,10 +16,17 @@ class HeaderContent extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 32),
-            child: Image.asset(
-              'assets/img/logo_transparent.png',
-              height: maxH * 0.9,
-              fit: BoxFit.contain,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pushNamed('/home_page');
+              },
+              mouseCursor: SystemMouseCursors.click,
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/img/logo_transparent.png',
+                height: maxH * 0.9,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           Row(
