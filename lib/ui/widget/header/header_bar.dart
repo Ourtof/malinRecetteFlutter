@@ -17,7 +17,7 @@ class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
         bottom: false,
         child: SizedBox(
           height: height,
-          child: const HeaderContent(),
+          child: HeaderContent(height: height),
         ),
       ),
     );

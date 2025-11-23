@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
 class HeaderContent extends StatelessWidget {
-  const HeaderContent({super.key});
+  final double height;
+  const HeaderContent({super.key, required this.height});
 
   @override
   Widget build(BuildContext context) {
-    // Récupère la hauteur disponible si besoin
-    final maxH = (context.findRenderObject() as RenderBox?)?.size.height ?? 80;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
@@ -24,7 +22,7 @@ class HeaderContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/img/logo_transparent.png',
-                height: maxH * 0.9,
+                height: height * 0.9,
                 fit: BoxFit.contain,
               ),
             ),
