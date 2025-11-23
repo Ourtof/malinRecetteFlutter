@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/profile_information.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -18,6 +22,112 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     loadProfile();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const HeaderBar(height: 100),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: error != null
+            ? Text(error!, style: const TextStyle(color: Colors.red))
+            : user == null
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: const CircleAvatar(
+                            radius: 45,
+                            backgroundImage: AssetImage(
+                              'assets/img/default_avatar.png',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          user!['pseudo'] ?? 'Utilisateur',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          user!['email'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                              vertical: 16,
+                            ),
+                            child: Column(
+                              children: [
+                                ProfileInformation(
+                                  label: 'Prénom',
+                                  value: user!['prenom'],
+                                ),
+                                ProfileInformation(
+                                  label: 'Nom',
+                                  value: user!['nom'],
+                                ),
+                                //_profileRow('Pseudo', user!['pseudo']),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        ElevatedButton(
+                          onPressed: logout,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.neutral60,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 20,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: const Text(
+                            'Se déconnecter',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+      bottomNavigationBar: FooterWidget(),
+    );
   }
 
   Future<void> loadProfile() async {
@@ -51,38 +161,5 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil utilisateur'),
-        actions: [  
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Déconnexion',
-            onPressed: logout,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: error != null
-            ? Text(error!, style: const TextStyle(color: Colors.red))
-            : user == null
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Email : ${user!['email']}"),
-                  Text("Prénom : ${user!['prenom']}"),
-                  Text("Nom : ${user!['nom']}"),
-                  Text("Pseudo : ${user!['pseudo']}"),
-                  //TODO: vérifier si d'autres champs sont nécessaires
-                ],
-              ),
-      ),
-    );
   }
 }
