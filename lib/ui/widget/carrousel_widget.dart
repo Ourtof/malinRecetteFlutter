@@ -15,17 +15,17 @@ class CarrouselWidget extends StatelessWidget {
         ..src = '/html/carrousel.html'
         ..style.border = 'none'
         ..style.width = '100%'
-        ..style.height = '80vh';
+        ..style.height = '100%';
       return frame;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 600,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.8,
       width: double.infinity,
-      child: HtmlElementView(viewType: 'carrousel-html-view'),
+      child: const HtmlElementView(viewType: 'carrousel-html-view'),
     );
   }
 }

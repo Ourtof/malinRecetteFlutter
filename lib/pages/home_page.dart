@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const HeaderBar(height: 100),
-      body: CarrouselWidget(),
+      body: Column(children: [Expanded(child: CarrouselWidget())]),
       bottomNavigationBar: const FooterWidget(),
     );
   }
