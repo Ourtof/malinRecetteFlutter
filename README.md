@@ -16,6 +16,14 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 
-***** serveur ****
+## DEV
+
+***** serveur *****
 
 Démarrer le serveur en --no-tls pour pas que le serveur se démarre en https alors que dart cherche du http.
+
+***** compte *****
+
+compte user : azerty@gmail.com / azerty
+
+compte admin :
