@@ -40,7 +40,7 @@ class HeaderContent extends StatelessWidget {
               _NavLink(
                 label: 'Recettes',
                 onTap: () {
-                  Navigator.of(context).pushNamed('/recipes');
+                  Navigator.of(context).pushNamed('/recette');
                 },
               ),
               const SizedBox(width: 8),

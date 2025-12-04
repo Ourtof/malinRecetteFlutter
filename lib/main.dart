@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/pages/profile_page.dart';
 import 'package:malinrecetteflutter/pages/home_page.dart';
 import 'package:malinrecetteflutter/pages/login_page.dart';
+import 'package:malinrecetteflutter/pages/recipe_page.dart';
 import 'package:malinrecetteflutter/pages/register_page.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/profile': (context) => const ProfilePage(),
+        '/recette': (context) => const RecipePage(),
       },
     );
   }
