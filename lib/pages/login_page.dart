@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
@@ -22,7 +23,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await client.post(
         Uri.parse(
-          'http://127.0.0.1:8000/api/login',
+          //'http://127.0.0.1:8000/api/login',
+          '${ApiConfig.baseUrl}/api/login',
         ), // TODO: vérifier l'ip, la remplacer !
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
