@@ -28,12 +28,14 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> register() async {
     final client = http.Client();
     try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/register');
+
       final response = await client.post(
-        Uri.parse(
-          'https://127.0.0.1:8000/api/register',
-          //'$ApiConfig.baseUrl/api/register',
-        ), //TODO: pareil que login pour l'ip
-        headers: {'Content-Type': 'application/json'},
+        uri, //TODO: pareil que login pour l'ip
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: jsonEncode({
           'email': emailController.text,
           'password': passwordController.text,
