@@ -9,14 +9,13 @@ class FooterWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppColors.neutral90,
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 28),
+      child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text("© 2025 Malin'Recette", style: TextStyle(color: Colors.white)),
-          const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Text('Mentions légales', style: TextStyle(color: Colors.white)),
               SizedBox(width: 16),
