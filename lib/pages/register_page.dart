@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -28,6 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
       final response = await client.post(
         Uri.parse(
           'https://127.0.0.1:8000/api/register',
+          //'$ApiConfig.baseUrl/api/register',
         ), //TODO: pareil que login pour l'ip
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -64,7 +68,8 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inscription')),
+      appBar: const HeaderBar(height: 88),
+      bottomNavigationBar: const FooterWidget(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
