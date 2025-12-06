@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 
@@ -83,7 +84,21 @@ class _LoginPageState extends State<LoginPage> {
               },
               child: const Text("Pas de compte ? S'inscrire !"),
             ),
-            ElevatedButton(onPressed: login, child: const Text('Se connecter')),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.neutral60,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 20,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text('Se connecter'),
+            ),
             if (message != null) ...[
               const SizedBox(height: 20),
               Text(message!, style: const TextStyle(color: Colors.red)),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import '../../../services/recipe_service.dart';
 
@@ -146,7 +148,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
               // Sélection des tags
               const Text(
-                'Filtres / tags existants',
+                'Filtres',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -194,10 +196,20 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 const SizedBox(height: 24),
               ],
 
-              SizedBox(
-                width: double.infinity,
+              Center(
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.neutral60,
+                    textStyle: TextStyle(fontSize: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 20,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20,
@@ -211,6 +223,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
           ),
         ),
       ),
+      bottomNavigationBar: FooterWidget(),
     );
   }
 }
