@@ -90,4 +90,23 @@ class RecipeService {
     final jsonBody = jsonDecode(response.body) as Map<String, dynamic>;
     return Recipe.fromJson(jsonBody);
   }
+
+  Future<List<String>> fetchAvailableTags() async {
+    final uri = Uri.parse('$baseUrl/api/tags');
+
+    final response = await http.get(
+      uri,
+      headers: {'Accept': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      print('Erreur tags (${response.statusCode}) : ${response.body}');
+      throw Exception(
+        'Impossible de charger les tags (${response.statusCode})',
+      );
+    }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((e) => e.toString()).toList();
+  }
 }
