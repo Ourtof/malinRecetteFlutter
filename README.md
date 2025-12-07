@@ -31,3 +31,7 @@ compte admin :
 ## SECURITE 
 
 - Pour la sécurité, illustrations est limité par la taille ainsi que par le mime.
+
+## ANECDOTE
+
+l'api m'a bien fait chier car crossOrigin obligatoire. Sinon, si ce n'était pas le cas, j'aurais pu enlever le show d'illustration et le faire en 2 lignes en flutter.
