@@ -125,6 +125,54 @@ class _RecipePageState extends State<RecipePage> {
                 ),
               ),
 
+              // 🔽 Bouton reset tags (affiché seulement si un tag est sélectionné)
+              if (_selectedTag != null)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 8,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _selectedTag = null;
+                        });
+                        _loadRecipes();
+                      },
+                      icon: const Icon(Icons.filter_alt_off, size: 16),
+                      label: const Text(
+                        'Réinitialiser les filtres',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.06),
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                          side: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.35),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
               // Liste des recettes
               Expanded(
                 child: FutureBuilder<PaginatedRecipes>(
