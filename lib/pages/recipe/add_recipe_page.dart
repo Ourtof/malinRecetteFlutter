@@ -1,4 +1,6 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
@@ -21,11 +23,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
   bool _isSubmitting = false;
   String? _errorMessage;
 
-  // ---- Gestion des tags existants ----
   bool _isLoadingTags = true;
   String? _tagsLoadError;
   List<String> _availableTags = [];
   final Set<String> _selectedTags = {};
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? _pickedImage;
+  Uint8List? _pickedImageBytes;
 
   @override
   void initState() {
@@ -62,8 +67,36 @@ class _AddRecipePageState extends State<AddRecipePage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+
+      setState(() {
+        _pickedImage = image;
+        _pickedImageBytes = bytes;
+      });
+    }
+  }
+
   Future<void> _submit() async {
+    if (_isSubmitting) return;
+
+    // Validation du formulaire
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Vérifier l'image
+    if (_pickedImageBytes == null || _pickedImage == null) {
+      setState(() {
+        _errorMessage = 'Une illustration est obligatoire pour la recette.';
+      });
       return;
     }
 
@@ -74,13 +107,22 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     final titre = _titleController.text.trim();
     final contenu = _contentController.text.trim();
-    final tags = _selectedTags.toList(); // <== ICI maintenant
+    final tags = _selectedTags.toList();
 
     try {
+      
+      // 1) Upload de l'image (bytes + nom de fichier)
+      final illustrationId = await widget.recipeService.uploadIllustration(
+        _pickedImageBytes!,
+        _pickedImage!.name,
+      );
+
+      // 2) Création de la recette
       await widget.recipeService.createRecipe(
         titre: titre,
         contenu: contenu,
         tags: tags,
+        illustrationId: illustrationId,
       );
 
       if (!mounted) return;
@@ -114,6 +156,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 const SizedBox(height: 12),
               ],
 
+              // Titre
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -129,6 +172,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               ),
               const SizedBox(height: 16),
 
+              // Contenu
               TextFormField(
                 controller: _contentController,
                 decoration: const InputDecoration(
@@ -146,7 +190,59 @@ class _AddRecipePageState extends State<AddRecipePage> {
               ),
               const SizedBox(height: 16),
 
-              // Sélection des tags
+              // Illustration
+              Text(
+                'Illustration',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  // Vignette
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: _pickedImageBytes == null
+                        ? Container(
+                            width: 64,
+                            height: 64,
+                            color: Colors.grey.shade200,
+                            child: const Icon(
+                              Icons.image_outlined,
+                              size: 28,
+                              color: Colors.grey,
+                            ),
+                          )
+                        : Image.memory(
+                            _pickedImageBytes!,
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Bouton texte discret
+                  TextButton.icon(
+                    onPressed: _isSubmitting ? null : _pickImage,
+                    icon: const Icon(Icons.upload_outlined, size: 18),
+                    label: const Text(
+                      'Choisir une image',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Tags
               const Text(
                 'Filtres',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -201,7 +297,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.neutral60,
-                    textStyle: TextStyle(fontSize: 16),
+                    textStyle: const TextStyle(fontSize: 16),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 20,
@@ -223,7 +319,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
           ),
         ),
       ),
-      bottomNavigationBar: FooterWidget(),
+      bottomNavigationBar: const FooterWidget(),
     );
   }
 }

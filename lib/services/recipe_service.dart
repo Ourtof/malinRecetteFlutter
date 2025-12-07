@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/recipe.dart';
 
 class RecipeService {
@@ -56,9 +59,42 @@ class RecipeService {
     return Recipe.fromJson(jsonBody);
   }
 
+  // Upload d'une illustration, retourne l'id créé en BDD
+  Future<int> uploadIllustration(Uint8List bytes, String filename) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception('Utilisateur non connecté');
+    }
+
+    final uri = Uri.parse('$baseUrl/api/illustrations');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/octet-stream', // ou 'image/jpeg/png'
+        'X-Filename': filename, // à lire côté Symfony
+      },
+      body: bytes,
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception(
+        'Erreur upload illustration (${response.statusCode}) : ${response.body}',
+      );
+    }
+
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return json['id'] as int;
+  }
+
   Future<Recipe> createRecipe({
     required String titre,
     required String contenu,
+    required int illustrationId,
     List<String> tags = const [],
   }) async {
     final prefs = await SharedPreferences.getInstance();
@@ -70,6 +106,13 @@ class RecipeService {
 
     final uri = Uri.parse('$baseUrl/api/recettes');
 
+    final body = jsonEncode({
+      'titre': titre,
+      'contenu': contenu,
+      'tags': tags,
+      'illustrationId': illustrationId,
+    });
+
     final response = await http.post(
       uri,
       headers: {
@@ -77,7 +120,7 @@ class RecipeService {
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({'titre': titre, 'contenu': contenu, 'tags': tags}),
+      body: body,
     );
 
     if (response.statusCode != 201) {
