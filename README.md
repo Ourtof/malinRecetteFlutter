@@ -27,3 +27,7 @@ Démarrer le serveur en --no-tls pour pas que le serveur se démarre en https al
 compte user : azerty@gmail.com / azerty
 
 compte admin :
+
+## SECURITE 
+
+- Pour la sécurité, illustrations est limité par la taille ainsi que par le mime.
