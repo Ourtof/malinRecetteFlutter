@@ -224,6 +224,33 @@ class _RecipePageState extends State<RecipePage> {
 
                                       const SizedBox(height: 8),
 
+                                      // Image
+                                      if (recipe.illustration != null &&
+                                          recipe
+                                              .illustration!
+                                              .nomFichier
+                                              .isNotEmpty)
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: Image.network(
+                                              '${ApiConfig.baseUrl}/api/illustrations/${recipe.illustration!.nomFichier}',
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                    return const SizedBox.shrink();
+                                                  },
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        const SizedBox(height: 4),
+
+                                      const SizedBox(height: 8),
+
                                       // Auteur + date
                                       if (recipe.auteur != null)
                                         Text(
@@ -234,7 +261,7 @@ class _RecipePageState extends State<RecipePage> {
                                           ).textTheme.bodySmall,
                                         ),
 
-                                      const Spacer(),
+                                      const SizedBox(height: 4),
 
                                       // Tags
                                       if (recipe.tags.isNotEmpty) ...[
