@@ -34,4 +34,5 @@ compte admin :
 
 ## ANECDOTE
 
-l'api m'a bien fait chier car crossOrigin obligatoire. Sinon, si ce n'était pas le cas, j'aurais pu enlever le show d'illustration et le faire en 2 lignes en flutter.
+- l'api m'a bien fait chier car crossOrigin obligatoire. Sinon, si ce n'était pas le cas, j'aurais pu enlever le show d'illustration et le faire en 2 lignes en flutter.
+- Pour les type de personne, j'ai du faire un fichier Json car le front et le back sont deux technos séparées donc j'ai du me compliquer le projet là dessus aussi pour qu'ils communiquent.
