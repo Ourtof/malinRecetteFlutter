@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/models/recommended_recipe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/recipe.dart';
@@ -150,5 +151,36 @@ class RecipeService {
 
     final List<dynamic> data = jsonDecode(response.body);
     return data.map((e) => e.toString()).toList();
+  }
+
+  Future<RecommendedRecipe?> getRecommendedRecipe() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception('Utilisateur non connecté');
+    }
+
+    final uri = Uri.parse('$baseUrl/api/recipes/recommend');
+
+    final response = await http.get(
+      uri,
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonBody =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return RecommendedRecipe.fromJson(jsonBody);
+    }
+
+    if (response.statusCode == 204) {
+      // Aucune recette correspondant au profil
+      return null;
+    }
+
+    throw Exception(
+      'Erreur lors de la recommandation (${response.statusCode}) : ${response.body}',
+    );
   }
 }
