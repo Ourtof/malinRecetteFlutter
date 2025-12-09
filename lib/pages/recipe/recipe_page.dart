@@ -24,6 +24,8 @@ class _RecipePageState extends State<RecipePage> {
 
   Future<PaginatedRecipes>? _futureRecipes;
 
+  bool _isRecommending = false;
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +72,73 @@ class _RecipePageState extends State<RecipePage> {
     }
   }
 
+  Future<void> _recommendRecipe() async {
+    // Empêche le spam : si un appel est déjà en cours, on ne relance pas un deuxième clic.
+    if (_isRecommending) return;
+
+    setState(() {
+      _isRecommending = true;
+    });
+
+    try {
+      final recommended = await _recipeService.getRecommendedRecipe();
+
+      // Sécurité Flutter : si le widget a été détruit pendant l’attente (ex : navigation), on arrête tout.
+      // Fait en sorte de ne pas avoir d'erreur Flutter si l'utilisateur quitte la page par exemple.
+      if (!mounted) return;
+
+      if (recommended == null) {
+        // CAS ECHEC : Aucune recette pour ce profil
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Aucune recette ne correspond à ton profil. "
+              "Modifie ton profil ou ajoute de nouvelles recettes.",
+            ),
+          ),
+        );
+        return;
+      }
+
+      // CAS SUCCES : On charge la recette complète pour afficher la page de détail
+      final recipe = await _recipeService.getRecipe(recommended.id);
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => RecipeDetailPage(recipe: recipe)),
+      );
+      // catch : gestion des erreurs
+    } catch (e) {
+      if (!mounted) return;
+
+      final error = e.toString().toLowerCase();
+      String userMessage;
+
+      if (error.contains('profil alimentaire non')) {
+        userMessage =
+            "Ton profil alimentaire n’est pas encore rempli. Va dans la page Profil et remplis-le pour activer la recommandation.";
+      } else if (error.contains('utilisateur non connect')) {
+        userMessage =
+            "Connecte-toi pour utiliser la recommandation de recettes.";
+      } else {
+        userMessage =
+            "Impossible de te proposer une recette pour le moment. Réessaie plus tard.";
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userMessage)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRecommending = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -88,12 +157,34 @@ class _RecipePageState extends State<RecipePage> {
     return Scaffold(
       appBar: const HeaderBar(height: 88),
       bottomNavigationBar: const FooterWidget(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: _isLogged
-          ? FloatingActionButton(
-              onPressed: _openAddRecipe,
-              child: const Icon(Icons.add),
+          ? SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Bouton reco en bas à gauche
+                    FloatingActionButton.extended(
+                      heroTag: 'recommend_fab',
+                      onPressed: _isRecommending ? null : _recommendRecipe,
+                      label: const Text(
+                        "Me proposer une recette",
+                      ), //: const Icon(Icons.add),
+                    ),
+                    FloatingActionButton(
+                      heroTag: 'add_fab',
+                      onPressed: _openAddRecipe,
+                      child: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+              ),
             )
           : null,
+
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),

@@ -153,6 +153,7 @@ class RecipeService {
     return data.map((e) => e.toString()).toList();
   }
 
+  // API
   Future<RecommendedRecipe?> getRecommendedRecipe() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
@@ -161,7 +162,7 @@ class RecipeService {
       throw Exception('Utilisateur non connecté');
     }
 
-    final uri = Uri.parse('$baseUrl/api/recipes/recommend');
+    final uri = Uri.parse('$baseUrl/api/recettes/recommandation');
 
     final response = await http.get(
       uri,
