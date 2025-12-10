@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
@@ -31,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/register');
 
       final response = await client.post(
-        uri, //TODO: pareil que login pour l'ip
+        uri,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -95,16 +96,27 @@ class _RegisterPageState extends State<RegisterPage> {
                 keyboard: TextInputType.number,
               ),
 
-              // Ajoutez d'autres champs ici...
               const SizedBox(height: 24),
-              ElevatedButton(
+
+              // Lien "Déjà un compte ? Se connecter !"
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).pushReplacementNamed('/login'),
+                child: const Text("Déjà un compte ? Se connecter !"),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Bouton principal "S'inscrire"
+              PrimaryActionButtonWidget(
+                label: "S'inscrire",
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     register();
                   }
                 },
-                child: const Text("S'inscrire"),
               ),
+
               if (message != null) ...[
                 const SizedBox(height: 20),
                 Text(
@@ -112,13 +124,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   style: const TextStyle(color: Colors.red, fontSize: 16),
                 ),
               ],
-              const SizedBox(height: 12),
-
-              TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed('/login'),
-                child: const Text("Déjà un compte ? Se connecter !"),
-              ),
             ],
           ),
         ),
