@@ -1,5 +1,3 @@
-// edit_profile_dialog.dart APRES freeze
-
 import 'package:flutter/material.dart';
 
 class EditProfileResult {
@@ -98,7 +96,6 @@ Future<EditProfileResult?> showEditProfileDialog(
         actions: [
           TextButton(
             onPressed: () {
-              // Validation simple
               if (prenomController.text.trim().isEmpty ||
                   nomController.text.trim().isEmpty ||
                   pseudoController.text.trim().isEmpty ||

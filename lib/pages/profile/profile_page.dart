@@ -50,6 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+
                         //_buildAvatar(),
                         const SizedBox(height: 16),
                         _buildNameAndEmail(),
@@ -72,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar() { // <= pas utilisé tant qu'on a pas fix l'avatar
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -132,11 +133,6 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: _isUpdating
               ? null
               : () async {
-                  // ✅ Assure-toi que user n'est pas null
-                  if (user == null) return;
-
-                  print('🔍 Avant dialog - user: $user');
-
                   final result = await showEditProfileDialog(
                     context,
                     initialPrenom: user?['prenom'] ?? '',
@@ -148,8 +144,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     initialVille: user?['ville'] ?? '',
                     initialCodePostal: (user?['codePostal']?.toString()) ?? '',
                   );
-
-                  print('🔍 Après dialog - result: $result');
 
                   if (result != null) {
                     await _updateProfile(
@@ -207,10 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       if (response.statusCode == 200) {
-        //setState(() => user = jsonDecode(response.body));
-        final userData = jsonDecode(response.body); // ✅ Déclare userData
-        print('🔍 USER DATA: $userData'); // ✅ AJOUTE CE PRINT
-        setState(() => user = userData);
+        setState(() => user = jsonDecode(response.body));
       } else {
         setState(
           () => error = 'Erreur : ${response.statusCode} — ${response.body}',
