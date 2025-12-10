@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 
@@ -23,10 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     final client = http.Client();
     try {
       final response = await client.post(
-        Uri.parse(
-          //'http://127.0.0.1:8000/api/login',
-          '${ApiConfig.baseUrl}/api/login',
-        ), // TODO: vérifier l'ip, la remplacer !
+        Uri.parse('${ApiConfig.baseUrl}/api/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': emailController.text,
@@ -39,9 +36,9 @@ class _LoginPageState extends State<LoginPage> {
         final token = data['token'];
         await AuthService.saveToken(token); // Gère le stockage
 
-        setState(() {
+        /*setState(() {
           message = 'Connexion réussie.';
-        });
+        });*/
         Future.microtask(() {
           Navigator.of(context).pushReplacementNamed('/home_page');
         });
@@ -85,20 +82,7 @@ class _LoginPageState extends State<LoginPage> {
               child: const Text("Pas de compte ? S'inscrire !"),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: login,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.neutral60,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: const Text('Se connecter'),
-            ),
+            PrimaryActionButtonWidget(label: "Se connecter", onPressed: login),
             if (message != null) ...[
               const SizedBox(height: 20),
               Text(message!, style: const TextStyle(color: Colors.red)),
