@@ -73,58 +73,96 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: const HeaderBar(height: 88),
       bottomNavigationBar: const FooterWidget(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _input(
-                emailController,
-                'Email',
-                keyboard: TextInputType.emailAddress,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              _input(passwordController, 'Mot de passe', obscure: true),
-              _input(pseudoController, 'Pseudo'),
-              _input(prenomController, 'Prénom'),
-              _input(nomController, 'Nom'),
-              _input(adresseController, 'Adresse'),
-              _input(villeController, 'Ville'),
-              _input(
-                codePostalController,
-                'Code postal',
-                keyboard: TextInputType.number,
-              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Titre
+                      Text(
+                        "Créer un compte",
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Rejoins Malin Recette pour une expérience plus personnalisée.",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
 
-              const SizedBox(height: 24),
+                      // Champs
+                      _input(
+                        emailController,
+                        'Email',
+                        keyboard: TextInputType.emailAddress,
+                      ),
+                      _input(passwordController, 'Mot de passe', obscure: true),
+                      _input(pseudoController, 'Pseudo'),
+                      _input(prenomController, 'Prénom'),
+                      _input(nomController, 'Nom'),
+                      _input(adresseController, 'Adresse'),
+                      _input(villeController, 'Ville'),
+                      _input(
+                        codePostalController,
+                        'Code postal',
+                        keyboard: TextInputType.number,
+                      ),
 
-              // Lien "Déjà un compte ? Se connecter !"
-              TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pushReplacementNamed('/login'),
-                child: const Text("Déjà un compte ? Se connecter !"),
-              ),
+                      const SizedBox(height: 16),
 
-              const SizedBox(height: 12),
+                      // Lien "Déjà un compte ? Se connecter !"
+                      TextButton(
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pushReplacementNamed('/login'),
+                        child: const Text("Déjà un compte ? Se connecter !"),
+                      ),
 
-              // Bouton principal "S'inscrire"
-              PrimaryActionButtonWidget(
-                label: "S'inscrire",
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    register();
-                  }
-                },
-              ),
+                      const SizedBox(height: 8),
 
-              if (message != null) ...[
-                const SizedBox(height: 20),
-                Text(
-                  message!,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                      // Bouton principal "S'inscrire"
+                      PrimaryActionButtonWidget(
+                        label: "S'inscrire",
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            register();
+                          }
+                        },
+                      ),
+
+                      // Message éventuel
+                      if (message != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          message!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ],
-            ],
+              ),
+            ),
           ),
         ),
       ),

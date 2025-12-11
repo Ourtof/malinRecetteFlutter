@@ -61,33 +61,86 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: const HeaderBar(height: 88),
       bottomNavigationBar: const FooterWidget(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Titre
+                    Text(
+                      'Connexion',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Retrouve tes recettes préférées en te connectant à ton compte.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Champs
+                    TextField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Mot de passe',
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Bouton de connexion
+                    PrimaryActionButtonWidget(
+                      label: "Se connecter",
+                      onPressed: login,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Lien inscription
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/register');
+                      },
+                      child: const Text("Pas de compte ? S'inscrire !"),
+                    ),
+
+                    // Message d'erreur
+                    if (message != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        message!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Mot de passe'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/register');
-              },
-              child: const Text("Pas de compte ? S'inscrire !"),
-            ),
-            SizedBox(height: 16),
-            PrimaryActionButtonWidget(label: "Se connecter", onPressed: login),
-            if (message != null) ...[
-              const SizedBox(height: 20),
-              Text(message!, style: const TextStyle(color: Colors.red)),
-            ],
-          ],
+          ),
         ),
       ),
     );
