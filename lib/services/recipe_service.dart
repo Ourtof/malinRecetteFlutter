@@ -106,10 +106,22 @@ class RecipeService {
 
     final uri = Uri.parse('$baseUrl/api/recettes');
 
+    // On extrait les codes à partir des strings du style
+    // "{code: GLUTEN, contenu: Contient gluten, categorie: ALLERGENE}"
+    final tagCodes = tags
+        .map((t) {
+          final reg = RegExp(r'code:\s*([A-Z_]+)');
+          final match = reg.firstMatch(t);
+          return match?.group(1);
+        })
+        .whereType<String>()
+        .toList();
+
     final body = jsonEncode({
       'titre': titre,
       'contenu': contenu,
-      'tags': tags,
+      'tags': tags, // on garde pour compat éventuelle
+      'tagCodes': tagCodes, // ce que le back attend réellement
       'illustrationId': illustrationId,
     });
 
