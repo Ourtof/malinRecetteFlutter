@@ -107,10 +107,9 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     final titre = _titleController.text.trim();
     final contenu = _contentController.text.trim();
-    final tags = _selectedTags.toList();
+    final tags = _selectedTags.toList(); // on envoie les mêmes valeurs qu'avant
 
     try {
-      
       // 1) Upload de l'image (bytes + nom de fichier)
       final illustrationId = await widget.recipeService.uploadIllustration(
         _pickedImageBytes!,
@@ -140,8 +139,38 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
+  /// Extrait un label propre :
+  /// "{code: ARACHIDES, contenu: Contient arachides, categorie: ALLERGENE}"
+  /// --> "Contient arachides"
+  String _formatTagLabel(String raw) {
+    if (!raw.contains('contenu:')) return raw;
+
+    final contenuIndex = raw.indexOf('contenu:');
+    if (contenuIndex == -1) return raw;
+
+    final start = contenuIndex + 'contenu:'.length;
+    final commaIndex = raw.indexOf(',', start);
+    final end = commaIndex == -1 ? raw.length : commaIndex;
+
+    return raw.substring(start, end).trim();
+  }
+
+  bool _isObjectifTag(String raw) =>
+      raw.contains('categorie: OBJECTIF') || raw.contains('categorie:OBJECTIF');
+
+  bool _isAllergeneTag(String raw) =>
+      raw.contains('categorie: ALLERGENE') ||
+      raw.contains('categorie:ALLERGENE');
+
   @override
   Widget build(BuildContext context) {
+    final objectifTags = _availableTags
+        .where(_isObjectifTag)
+        .toList(growable: false);
+    final allergeneTags = _availableTags
+        .where(_isAllergeneTag)
+        .toList(growable: false);
+
     return Scaffold(
       appBar: const HeaderBar(height: 88),
       body: SingleChildScrollView(
@@ -247,7 +276,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 'Filtres',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 24),
 
               if (_isLoadingTags) ...[
                 const Center(child: CircularProgressIndicator()),
@@ -269,27 +298,112 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
                 const SizedBox(height: 16),
               ] else ...[
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _availableTags.map((tag) {
-                    final isSelected = _selectedTags.contains(tag);
-                    return FilterChip(
-                      label: Text(tag),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTags.add(tag);
-                          } else {
-                            _selectedTags.remove(tag);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 24),
+                if (objectifTags.isNotEmpty) ...[
+                  Text(
+                    'Objectif',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: objectifTags.map((tag) {
+                      final isSelected = _selectedTags.contains(tag);
+                      final label = _formatTagLabel(tag);
+                      return FilterChip(
+                        label: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedTags.add(tag);
+                            } else {
+                              _selectedTags.remove(tag);
+                            }
+                          });
+                        },
+                        //backgroundColor: AppColors.neutral10,
+                        selectedColor: AppColors.neutral60.withOpacity(0.18),
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.neutral60
+                                : AppColors.neutral60,
+                          ),
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (allergeneTags.isNotEmpty) ...[
+                  Text(
+                    'Allergènes',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: allergeneTags.map((tag) {
+                      final isSelected = _selectedTags.contains(tag);
+                      final label = _formatTagLabel(tag);
+                      return FilterChip(
+                        label: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedTags.add(tag);
+                            } else {
+                              _selectedTags.remove(tag);
+                            }
+                          });
+                        },
+                        //backgroundColor: AppColors.neutral10,
+                        selectedColor: AppColors.neutral60.withOpacity(0.18),
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.neutral60
+                                : AppColors.neutral60,
+                          ),
+                        ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ],
 
               Center(
