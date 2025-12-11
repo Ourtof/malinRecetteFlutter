@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Retrouve tes recettes préférées en te connectant à ton compte.',
+                      'Content de te revoir !',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
