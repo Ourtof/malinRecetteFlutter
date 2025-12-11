@@ -26,7 +26,7 @@ Démarrer le serveur en --no-tls pour pas que le serveur se démarre en https al
 
 compte user : azerty@gmail.com / azerty
 
-compte admin :
+compte admin : admin@gmail.com / admin
 
 ## SECURITE 
 
