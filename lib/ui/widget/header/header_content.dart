@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
-class HeaderContent extends StatelessWidget {
+class HeaderContent extends StatefulWidget {
   final double height;
   const HeaderContent({super.key, required this.height});
+
+  @override
+  State<HeaderContent> createState() => _HeaderContentState();
+}
+
+class _HeaderContentState extends State<HeaderContent> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAdminStatus();
+  }
+
+  Future<void> _loadAdminStatus() async {
+    final isAdmin = await AuthService.isAdmin();
+    if (!mounted) return;
+    setState(() {
+      _isAdmin = isAdmin;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +43,7 @@ class HeaderContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/img/logo_transparent.png',
-                height: height * 0.9,
+                height: widget.height * 0.9,
                 fit: BoxFit.contain,
               ),
             ),
@@ -50,6 +71,16 @@ class HeaderContent extends StatelessWidget {
                   Navigator.of(context).pushNamed('/about');
                 },
               ),
+              if (_isAdmin) ...[
+                const SizedBox(width: 8),
+                _NavLink(
+                  label: 'Administration',
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/admin/users');
+                  },
+                ),
+              ],
+
               const SizedBox(width: 16),
               InkWell(
                 onTap: () async {

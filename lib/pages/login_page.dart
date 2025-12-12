@@ -35,10 +35,7 @@ class _LoginPageState extends State<LoginPage> {
         final data = jsonDecode(response.body);
         final token = data['token'];
         await AuthService.saveToken(token); // Gère le stockage
-
-        /*setState(() {
-          message = 'Connexion réussie.';
-        });*/
+        await AuthService.saveUserData(data['user']); // Stocke les données utilisateur
         Future.microtask(() {
           Navigator.of(context).pushReplacementNamed('/home_page');
         });
