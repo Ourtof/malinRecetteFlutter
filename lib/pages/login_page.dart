@@ -26,31 +26,52 @@ class _LoginPageState extends State<LoginPage> {
         Uri.parse('${ApiConfig.baseUrl}/api/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'email': emailController.text,
+          'email': emailController.text.trim(),
           'password': passwordController.text,
         }),
       );
 
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['token'];
-        await AuthService.saveToken(token); // Gère le stockage
-        await AuthService.saveUserData(data['user']); // Stocke les données utilisateur
-        Future.microtask(() {
-          Navigator.of(context).pushReplacementNamed('/home_page');
-        });
+        await AuthService.saveToken(data['token']);
+        await AuthService.saveUserData(data['user']);
+
+        Navigator.of(context).pushReplacementNamed('/home_page');
       } else {
         setState(() {
-          message = 'Erreur : ${response.statusCode} - ${response.body}';
+          message = _errorFromResponse(response);
         });
       }
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
-        message = 'Erreur réseau : $e';
+        message = "Erreur réseau. Réessaie dans quelques instants.";
       });
     } finally {
       client.close();
     }
+  }
+
+  String _errorFromResponse(http.Response response) {
+    // Si l'API renvoie un JSON avec "message", on le récupère
+    try {
+      final body = jsonDecode(response.body);
+      if (body is Map && body['message'] is String) {
+        return body['message'] as String;
+      }
+    } catch (_) {
+      // corps non-JSON (HTML 500) → on ignore
+    }
+
+    if (response.statusCode == 401 || response.statusCode == 403) {
+      return "Email ou mot de passe incorrect.";
+    }
+    if (response.statusCode >= 500) {
+      return "Le serveur rencontre un problème. Réessaie plus tard.";
+    }
+    return "Connexion impossible (code ${response.statusCode}).";
   }
 
   @override
@@ -124,13 +145,38 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text("Pas de compte ? S'inscrire !"),
                     ),
 
-                    // Message d'erreur
-                    if (message != null) ...[
+                    // Message d'erreur stylé
+                    if (message != null && message!.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Text(
-                        message!,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                message!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ],
