@@ -38,7 +38,6 @@ class AuthService {
   static Future<bool> isAdmin() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_userKey);
-    print('DEBUG user_data raw: $raw'); // <--- ajoute ça
     if (raw == null) return false;
 
     try {
