@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/pages/admin/admin_user_list_page.dart';
 import 'package:malinrecetteflutter/pages/profile/profile_page.dart';
 import 'package:malinrecetteflutter/pages/home_page.dart';
 import 'package:malinrecetteflutter/pages/login_page.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/profile': (context) => const ProfilePage(),
         '/recette': (context) => const RecipePage(),
+        '/admin/users': (context) => const AdminUserListPage(),
       },
     );
   }
