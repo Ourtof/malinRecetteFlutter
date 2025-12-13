@@ -72,10 +72,30 @@ class Recipe {
               json['illustration'] as Map<String, dynamic>,
             )
           : null,
-      tags: (json['tags'] as List<dynamic>? ?? [])
-          .map((t) => RecipeTag.fromJson(t as Map<String, dynamic>))
-          .toList(),
+      // ⬇️ ICI : on ne caste plus en List directement
+      tags: _parseTags(json['tags']),
     );
+  }
+
+  /// Accepte `tags` au format:
+  /// - liste: [ {...}, {...} ]
+  /// - ou map: { "0": {...}, "1": {...} }
+  static List<RecipeTag> _parseTags(dynamic raw) {
+    if (raw == null) return [];
+
+    if (raw is List) {
+      return raw
+          .map((e) => RecipeTag.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    if (raw is Map) {
+      return raw.values
+          .map((e) => RecipeTag.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    return [];
   }
 }
 
