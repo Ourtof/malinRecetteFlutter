@@ -64,19 +64,34 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
   List<AdminUser> _users = [];
   final Set<int> _updatingUserIds = {};
 
+  // Recherche
+  String _search = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      // croix
+      setState(() {});
+    });
     _loadUsers();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    // même clé que dans ton login
     return prefs.getString('jwt_token');
   }
 
-  Future<void> _loadUsers() async {
+  Future<void> _loadUsers({String? search}) async {
+    final effectiveSearch = search ?? _search;
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -93,7 +108,14 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
         return;
       }
 
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/admin/user');
+      final queryParams = <String, String>{};
+      if (effectiveSearch.isNotEmpty) {
+        queryParams['search'] = effectiveSearch;
+      }
+
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/admin/user',
+      ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
 
       final response = await http.get(
         uri,
@@ -117,6 +139,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
         setState(() {
           _users = users;
           _isLoading = false;
+          _search = effectiveSearch;
         });
       } else {
         if (!mounted) return;
@@ -262,7 +285,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _loadUsers,
+              onPressed: () => _loadUsers(search: ''),
               icon: const Icon(Icons.refresh),
               label: const Text('Réessayer'),
             ),
@@ -284,6 +307,37 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: 'Rechercher par pseudo ou email',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _loadUsers(search: '');
+                          },
+                        )
+                      : null,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+                onSubmitted: (value) {
+                  _loadUsers(search: value.trim());
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // ---- Ligne compteur + bouton refresh ----
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
@@ -293,13 +347,15 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
               ),
             ),
             IconButton(
-              onPressed: _loadUsers,
+              onPressed: () => _loadUsers(search: _search),
               tooltip: 'Rafraîchir',
               icon: const Icon(Icons.refresh),
             ),
           ],
         ),
         const SizedBox(height: 8),
+
+        // ---- Tableau ----
         Expanded(
           child: Scrollbar(
             thumbVisibility: true,
