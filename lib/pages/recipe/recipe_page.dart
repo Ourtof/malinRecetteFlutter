@@ -318,14 +318,17 @@ class _RecipePageState extends State<RecipePage> {
 
                             return InkWell(
                               borderRadius: BorderRadius.circular(16),
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final deleted = await Navigator.push<bool>(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) =>
                                         RecipeDetailPage(recipe: recipe),
                                   ),
                                 );
+                                if (deleted == true) {
+                                  _loadRecipes();
+                                }
                               },
                               child: Card(
                                 elevation: 1.5,

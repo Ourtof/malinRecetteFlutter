@@ -1,18 +1,146 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-import '../../models/recipe.dart';
 
-class RecipeDetailPage extends StatelessWidget {
+import '../../models/recipe.dart';
+import 'edit_recipe_page.dart';
+
+class RecipeDetailPage extends StatefulWidget {
   final Recipe recipe;
 
   const RecipeDetailPage({super.key, required this.recipe});
+
+  @override
+  State<RecipeDetailPage> createState() => _RecipeDetailPageState();
+}
+
+class _RecipeDetailPageState extends State<RecipeDetailPage> {
+  late Recipe _recipe;
+  bool _isAdmin = false;
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _recipe = widget.recipe;
+    _loadAdminStatus();
+  }
+
+  Future<void> _loadAdminStatus() async {
+    final isAdmin = await AuthService.isAdmin();
+    if (!mounted) return;
+    setState(() {
+      _isAdmin = isAdmin;
+    });
+  }
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
+  }
+
+  Future<void> _deleteRecipe() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer la recette ?'),
+        content: const Text(
+          'Cette opération est définitive. Tu es sûr de vouloir supprimer cette recette ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final token = await AuthService.getToken();
+    if (token == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token manquant, reconnecte-toi.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isDeleting = true;
+    });
+
+    try {
+      final uri =
+          Uri.parse('${ApiConfig.baseUrl}/api/recettes/${_recipe.id}');
+
+      final resp = await http.delete(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (!mounted) return;
+
+      if (resp.statusCode == 204) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Recette supprimée.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erreur lors de la suppression (${resp.statusCode})',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : $e')),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isDeleting = false;
+      });
+    }
+  }
+
+  Future<void> _editRecipe() async {
+    final updated = await Navigator.push<Recipe>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditRecipePage(recipe: _recipe),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (updated != null) {
+      setState(() {
+        _recipe = updated;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Recette mise à jour.')),
+      );
+    }
   }
 
   @override
@@ -31,15 +159,48 @@ class RecipeDetailPage extends StatelessWidget {
               children: [
                 // Titre centré
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
-                    recipe.titre,
+                    _recipe.titre,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+
+                // Actions admin
+                if (_isAdmin) ...[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _editRecipe,
+                          icon: const Icon(Icons.edit, size: 18),
+                          label: const Text('Éditer'),
+                        ),
+                        FilledButton.icon(
+                          onPressed: _isDeleting ? null : _deleteRecipe,
+                          icon: _isDeleting
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.delete_outline, size: 18),
+                          label: Text(
+                            _isDeleting ? 'Suppression...' : 'Supprimer',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Card principale
                 Container(
@@ -60,32 +221,32 @@ class RecipeDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Auteur + date
-                      if (recipe.auteur != null || recipe.dateRecette != null)
+                      if (_recipe.auteur != null || _recipe.dateRecette != null)
                         Row(
                           children: [
                             const Icon(Icons.person, size: 18),
                             const SizedBox(width: 8),
                             Text(
                               [
-                                if (recipe.auteur != null)
-                                  recipe.auteur!.pseudo,
-                                if (recipe.dateRecette != null)
-                                  _formatDate(recipe.dateRecette),
+                                if (_recipe.auteur != null)
+                                  _recipe.auteur!.pseudo,
+                                if (_recipe.dateRecette != null)
+                                  _formatDate(_recipe.dateRecette),
                               ].join(' • '),
                               style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
 
-                      if (recipe.auteur != null || recipe.dateRecette != null)
+                      if (_recipe.auteur != null || _recipe.dateRecette != null)
                         const SizedBox(height: 12),
 
                       // Tags
-                      if (recipe.tags.isNotEmpty)
+                      if (_recipe.tags.isNotEmpty)
                         Wrap(
                           spacing: 8,
                           runSpacing: -4,
-                          children: recipe.tags
+                          children: _recipe.tags
                               .map(
                                 (t) => Chip(
                                   label: Text(
@@ -100,17 +261,16 @@ class RecipeDetailPage extends StatelessWidget {
                               .toList(),
                         ),
 
-                      if (recipe.tags.isNotEmpty) const SizedBox(height: 16),
+                      if (_recipe.tags.isNotEmpty) const SizedBox(height: 16),
 
                       const Divider(),
-
                       const SizedBox(height: 16),
 
-                      // Contenu de la recette
+                      // Contenu
                       Text(
-                        recipe.contenu,
+                        _recipe.contenu,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          height: 1.4, // lisibilité
+                          height: 1.4,
                         ),
                       ),
                     ],
