@@ -396,8 +396,40 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
     final isActive = user.enabled;
 
+    Future<void> handleTap() async {
+      // Confirmation uniquement pour la désactivation
+      if (isActive) {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text('Désactiver le compte ?'),
+              content: Text(
+                'Tu es sûr de vouloir désactiver le compte "${user.pseudo}" ? '
+                'Il ne pourra plus se connecter.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Annuler'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Désactiver'),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (confirm != true) return;
+      }
+
+      await _toggleUser(user);
+    }
+
     return TextButton.icon(
-      onPressed: () => _toggleUser(user),
+      onPressed: handleTap,
       icon: Icon(isActive ? Icons.block : Icons.check_circle_outline, size: 18),
       label: Text(isActive ? 'Désactiver' : 'Réactiver'),
       style: TextButton.styleFrom(
