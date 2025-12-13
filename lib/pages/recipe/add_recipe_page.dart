@@ -87,12 +87,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
   Future<void> _submit() async {
     if (_isSubmitting) return;
 
-    // Validation du formulaire
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Vérifier l'image
     if (_pickedImageBytes == null || _pickedImage == null) {
       setState(() {
         _errorMessage = 'Une illustration est obligatoire pour la recette.';
@@ -107,16 +105,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     final titre = _titleController.text.trim();
     final contenu = _contentController.text.trim();
-    final tags = _selectedTags.toList(); // on envoie les mêmes valeurs qu'avant
+    final tags = _selectedTags.toList();
 
     try {
-      // 1) Upload de l'image (bytes + nom de fichier)
       final illustrationId = await widget.recipeService.uploadIllustration(
         _pickedImageBytes!,
         _pickedImage!.name,
       );
 
-      // 2) Création de la recette
       await widget.recipeService.createRecipe(
         titre: titre,
         contenu: contenu,
@@ -139,7 +135,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
-  /// Extrait un label propre :
   /// "{code: ARACHIDES, contenu: Contient arachides, categorie: ALLERGENE}"
   /// --> "Contient arachides"
   String _formatTagLabel(String raw) {
@@ -173,267 +168,273 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     return Scaffold(
       appBar: const HeaderBar(height: 88),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (_errorMessage != null) ...[
-                Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-                const SizedBox(height: 12),
-              ],
-
-              // Titre
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Titre de la recette',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Le titre est obligatoire';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Contenu
-              TextFormField(
-                controller: _contentController,
-                decoration: const InputDecoration(
-                  labelText: 'Contenu / étapes',
-                  alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 8,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Le contenu est obligatoire';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Illustration
-              Text(
-                'Illustration',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Row(
+      bottomNavigationBar: const FooterWidget(),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Vignette
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: _pickedImageBytes == null
-                        ? Container(
-                            width: 64,
-                            height: 64,
-                            color: Colors.grey.shade200,
-                            child: const Icon(
-                              Icons.image_outlined,
-                              size: 28,
-                              color: Colors.grey,
-                            ),
-                          )
-                        : Image.memory(
-                            _pickedImageBytes!,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                  const SizedBox(width: 12),
+                  if (_errorMessage != null) ...[
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
 
-                  // Bouton texte discret
-                  TextButton.icon(
-                    onPressed: _isSubmitting ? null : _pickImage,
-                    icon: const Icon(Icons.upload_outlined, size: 18),
-                    label: const Text(
-                      'Choisir une image',
-                      style: TextStyle(fontSize: 14),
+                  // Titre
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Titre de la recette',
+                      border: OutlineInputBorder(),
                     ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Le titre est obligatoire';
+                      }
+                      return null;
+                    },
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // Tags
-              const Text(
-                'Filtres',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-
-              if (_isLoadingTags) ...[
-                const Center(child: CircularProgressIndicator()),
-                const SizedBox(height: 16),
-              ] else if (_tagsLoadError != null) ...[
-                Text(
-                  _tagsLoadError!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                TextButton(
-                  onPressed: _loadTags,
-                  child: const Text('Recharger'),
-                ),
-                const SizedBox(height: 16),
-              ] else if (_availableTags.isEmpty) ...[
-                const Text(
-                  'Aucun tag disponible pour le moment.',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-                const SizedBox(height: 16),
-              ] else ...[
-                if (objectifTags.isNotEmpty) ...[
-                  Text(
-                    'Objectif',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  // Contenu
+                  TextFormField(
+                    controller: _contentController,
+                    decoration: const InputDecoration(
+                      labelText: 'Contenu / étapes',
+                      alignLabelWithHint: true,
+                      border: OutlineInputBorder(),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: objectifTags.map((tag) {
-                      final isSelected = _selectedTags.contains(tag);
-                      final label = _formatTagLabel(tag);
-                      return FilterChip(
-                        label: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                          ),
-                        ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedTags.add(tag);
-                            } else {
-                              _selectedTags.remove(tag);
-                            }
-                          });
-                        },
-                        //backgroundColor: AppColors.neutral10,
-                        selectedColor: AppColors.neutral60.withOpacity(0.18),
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: isSelected
-                                ? AppColors.neutral60
-                                : AppColors.neutral60,
-                          ),
-                        ),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                if (allergeneTags.isNotEmpty) ...[
-                  Text(
-                    'Allergènes',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: allergeneTags.map((tag) {
-                      final isSelected = _selectedTags.contains(tag);
-                      final label = _formatTagLabel(tag);
-                      return FilterChip(
-                        label: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                          ),
-                        ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedTags.add(tag);
-                            } else {
-                              _selectedTags.remove(tag);
-                            }
-                          });
-                        },
-                        //backgroundColor: AppColors.neutral10,
-                        selectedColor: AppColors.neutral60.withOpacity(0.18),
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: isSelected
-                                ? AppColors.neutral60
-                                : AppColors.neutral60,
-                          ),
-                        ),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                      );
-                    }).toList(),
+                    minLines: 6,
+                    maxLines: 12,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Le contenu est obligatoire';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 24),
-                ],
-              ],
 
-              Center(
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.neutral60,
-                    textStyle: const TextStyle(fontSize: 16),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                  // Illustration
+                  Text(
+                    'Illustration',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Créer la recette'),
-                ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: _pickedImageBytes == null
+                            ? Container(
+                                width: 64,
+                                height: 64,
+                                color: Colors.grey.shade200,
+                                child: const Icon(
+                                  Icons.image_outlined,
+                                  size: 28,
+                                  color: Colors.grey,
+                                ),
+                              )
+                            : Image.memory(
+                                _pickedImageBytes!,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton.icon(
+                        onPressed: _isSubmitting ? null : _pickImage,
+                        icon: const Icon(Icons.upload_outlined, size: 18),
+                        label: const Text(
+                          'Choisir une image',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Tags
+                  Text(
+                    'Tags',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  if (_isLoadingTags) ...[
+                    const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: 16),
+                  ] else if (_tagsLoadError != null) ...[
+                    Text(
+                      _tagsLoadError!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    TextButton(
+                      onPressed: _loadTags,
+                      child: const Text('Recharger'),
+                    ),
+                    const SizedBox(height: 16),
+                  ] else if (_availableTags.isEmpty) ...[
+                    const Text(
+                      'Aucun tag disponible pour le moment.',
+                      style: TextStyle(fontStyle: FontStyle.italic),
+                    ),
+                    const SizedBox(height: 16),
+                  ] else ...[
+                    if (objectifTags.isNotEmpty) ...[
+                      Text(
+                        'Objectif',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: objectifTags.map((tag) {
+                          final isSelected = _selectedTags.contains(tag);
+                          final label = _formatTagLabel(tag);
+                          return FilterChip(
+                            label: Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedTags.add(tag);
+                                } else {
+                                  _selectedTags.remove(tag);
+                                }
+                              });
+                            },
+                            selectedColor: AppColors.neutral60.withOpacity(
+                              0.18,
+                            ),
+                            shape: StadiumBorder(
+                              side: BorderSide(color: AppColors.neutral60),
+                            ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (allergeneTags.isNotEmpty) ...[
+                      Text(
+                        'Allergènes',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: allergeneTags.map((tag) {
+                          final isSelected = _selectedTags.contains(tag);
+                          final label = _formatTagLabel(tag);
+                          return FilterChip(
+                            label: Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedTags.add(tag);
+                                } else {
+                                  _selectedTags.remove(tag);
+                                }
+                              });
+                            },
+                            selectedColor: AppColors.neutral60.withOpacity(
+                              0.18,
+                            ),
+                            shape: StadiumBorder(
+                              side: BorderSide(color: AppColors.neutral60),
+                            ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ],
+
+                  // Bouton centré, orange
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.neutral60,
+                        textStyle: const TextStyle(fontSize: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 20,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Créer la recette'),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
-      bottomNavigationBar: const FooterWidget(),
     );
   }
 }
