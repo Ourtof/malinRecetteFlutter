@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import '../../../services/recipe_service.dart';
@@ -407,7 +408,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   // Bouton centré, orange
                   Align(
                     alignment: Alignment.center,
-                    child: ElevatedButton(
+                    child: PrimaryActionButtonWidget(label: "Créer la recette", onPressed: () {
+                      _isSubmitting ? null : _submit;
+                    },)
+                    /*child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.neutral60,
@@ -427,7 +431,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('Créer la recette'),
-                    ),
+                    ),*/
                   ),
                 ],
               ),
