@@ -1,13 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/recipe.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../models/recipe.dart';
 
 class EditRecipePage extends StatefulWidget {
   final Recipe recipe;
@@ -184,6 +184,12 @@ class _EditRecipePageState extends State<EditRecipePage> {
             },
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            selectedColor: AppColors.neutral60.withOpacity(0.18),
+            shape: StadiumBorder(
+              side: BorderSide(
+                color: AppColors.neutral60, // orange border
+              ),
+            ),
           );
         }).toList(),
       );
@@ -233,7 +239,6 @@ class _EditRecipePageState extends State<EditRecipePage> {
     });
 
     try {
-      // Extraction des codes depuis les strings sélectionnées
       final tagCodes = _selectedTags
           .map((raw) {
             final reg = RegExp(r'code:\s*([A-Z_]+)');
@@ -353,8 +358,14 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   _buildTagsSection(context),
                   const SizedBox(height: 24),
 
-                  Center(
-                    child: FilledButton.icon(
+                  // Bouton Enregistrer
+                  Align(
+                    alignment: Alignment.center,
+                    child: PrimaryActionButtonWidget(
+                      label: 'Enregistrer',
+                      onPressed: _isSaving ? null : _save,
+                    ),
+                    /*child: FilledButton.icon(
                       onPressed: _isSaving ? null : _save,
                       icon: _isSaving
                           ? const SizedBox(
@@ -366,7 +377,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       label: Text(
                         _isSaving ? 'Enregistrement...' : 'Enregistrer',
                       ),
-                    ),
+                    ),*/
                   ),
                 ],
               ),
