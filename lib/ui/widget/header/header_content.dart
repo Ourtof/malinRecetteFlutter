@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/ui/widget/navlink_widget.dart';
 
 class HeaderContent extends StatefulWidget {
   final double height;
@@ -51,21 +52,21 @@ class _HeaderContentState extends State<HeaderContent> {
           Row(
             children: [
               const SizedBox(width: 24),
-              _NavLink(
+              NavLink(
                 label: 'Accueil',
                 onTap: () {
                   Navigator.of(context).pushNamed('/');
                 },
               ),
               const SizedBox(width: 8),
-              _NavLink(
+              NavLink(
                 label: 'Recettes',
                 onTap: () {
                   Navigator.of(context).pushNamed('/recette');
                 },
               ),
               const SizedBox(width: 8),
-              _NavLink(
+              NavLink(
                 label: 'À propos',
                 onTap: () {
                   Navigator.of(context).pushNamed('/about');
@@ -73,7 +74,7 @@ class _HeaderContentState extends State<HeaderContent> {
               ),
               if (_isAdmin) ...[
                 const SizedBox(width: 8),
-                _NavLink(
+                NavLink(
                   label: 'Administration',
                   onTap: () {
                     Navigator.of(context).pushNamed('/admin/users');
@@ -100,28 +101,6 @@ class _HeaderContentState extends State<HeaderContent> {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _NavLink extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _NavLink({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      mouseCursor: SystemMouseCursors.click,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.black, fontSize: 18),
-        ),
       ),
     );
   }

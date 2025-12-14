@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/ui/widget/Navlink_widget.dart';
 
 class FooterWidget extends StatelessWidget {
   const FooterWidget({super.key});
@@ -14,12 +15,17 @@ class FooterWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("© 2025 Malin'Recette", style: TextStyle(color: Colors.white)),
+          Text("© 2025 Malin'Recette"),
           Row(
-            children: const [
-              Text('Mentions légales', style: TextStyle(color: Colors.white)),
-              SizedBox(width: 16),
-              Text('Contact', style: TextStyle(color: Colors.white)),
+            children: [
+              NavLink(
+                label: 'Mentions légales',
+                onTap: () {
+                  Navigator.of(context).pushNamed('/MentionsLegales');
+                },
+              ),
+              const SizedBox(width: 16),
+              const Text('Contact', style: TextStyle(color: Colors.white)),
             ],
           ),
         ],
