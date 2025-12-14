@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/pages/admin/admin_user_list_page.dart';
 import 'package:malinrecetteflutter/pages/profile/profile_page.dart';
-import 'package:malinrecetteflutter/pages/home_page.dart';
-import 'package:malinrecetteflutter/pages/login_page.dart';
+import 'package:malinrecetteflutter/pages/HomePage/home_page.dart';
+import 'package:malinrecetteflutter/pages/login/login_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_page.dart';
-import 'package:malinrecetteflutter/pages/register_page.dart';
+import 'package:malinrecetteflutter/pages/register/register_page.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 
 void main() {
