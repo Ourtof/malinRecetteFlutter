@@ -25,7 +25,19 @@ class FooterWidget extends StatelessWidget {
                 },
               ),
               const SizedBox(width: 16),
-              const Text('Contact', style: TextStyle(color: Colors.white)),
+              //const Text('Contact', style: TextStyle(color: Colors.white)),
+              NavLink(
+                label: 'Qui sommes-nous ?',
+                onTap: () {
+                  Navigator.of(context).pushNamed('/about');
+                },
+              ),
+              NavLink(
+                label: "Contact",
+                onTap: () {
+                  Navigator.of(context).pushNamed('/contact');
+                },
+              ),
             ],
           ),
         ],

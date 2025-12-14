@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/pages/about/about.dart';
 import 'package:malinrecetteflutter/pages/admin/admin_user_list_page.dart';
+import 'package:malinrecetteflutter/pages/contact/contact.dart';
 import 'package:malinrecetteflutter/pages/mentions_legales/mentions_legales.dart';
 import 'package:malinrecetteflutter/pages/profile/profile_page.dart';
 import 'package:malinrecetteflutter/pages/HomePage/home_page.dart';
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
         '/recette': (context) => const RecipePage(),
         '/admin/users': (context) => const AdminUserListPage(),
         '/MentionsLegales': (context) => const MentionsLegales(),
+        '/about': (context) => const About(),
+        '/contact': (context) => const Contact(),
       },
     );
   }

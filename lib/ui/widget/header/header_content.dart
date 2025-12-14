@@ -66,12 +66,6 @@ class _HeaderContentState extends State<HeaderContent> {
                 },
               ),
               const SizedBox(width: 8),
-              NavLink(
-                label: 'À propos',
-                onTap: () {
-                  Navigator.of(context).pushNamed('/about');
-                },
-              ),
               if (_isAdmin) ...[
                 const SizedBox(width: 8),
                 NavLink(
