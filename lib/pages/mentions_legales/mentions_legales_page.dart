@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 
-class MentionsLegales extends StatelessWidget {
-  const MentionsLegales({super.key});
+class MentionsLegalesPage extends StatelessWidget {
+  const MentionsLegalesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
