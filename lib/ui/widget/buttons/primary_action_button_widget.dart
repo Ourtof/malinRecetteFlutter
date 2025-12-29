@@ -19,13 +19,8 @@ class PrimaryActionButtonWidget extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.neutral60,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 40,
-          vertical: 20,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       child: isLoading
           ? const SizedBox(
@@ -36,12 +31,7 @@ class PrimaryActionButtonWidget extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
-          : Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
+          : Text(label, style: const TextStyle(fontSize: 16)),
     );
   }
 }

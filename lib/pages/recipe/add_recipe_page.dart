@@ -408,9 +408,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   // Bouton centré, orange
                   Align(
                     alignment: Alignment.center,
-                    child: PrimaryActionButtonWidget(label: "Créer la recette", onPressed: () {
-                      _isSubmitting ? null : _submit;
-                    },)
+                    child: PrimaryActionButtonWidget(
+                      label: "Créer la recette",
+                      onPressed: () {
+                        _isSubmitting ? null : _submit;
+                      },
+                    ),
                     /*child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _submit,
                       style: ElevatedButton.styleFrom(

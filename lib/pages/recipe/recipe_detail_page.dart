@@ -83,8 +83,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     });
 
     try {
-      final uri =
-          Uri.parse('${ApiConfig.baseUrl}/api/recettes/${_recipe.id}');
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/recettes/${_recipe.id}');
 
       final resp = await http.delete(
         uri,
@@ -98,23 +97,21 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
 
       if (resp.statusCode == 204) {
         Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Recette supprimée.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Recette supprimée.')));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Erreur lors de la suppression (${resp.statusCode})',
-            ),
+            content: Text('Erreur lors de la suppression (${resp.statusCode})'),
           ),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
     } finally {
       if (!mounted) return;
       setState(() {
@@ -126,9 +123,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   Future<void> _editRecipe() async {
     final updated = await Navigator.push<Recipe>(
       context,
-      MaterialPageRoute(
-        builder: (_) => EditRecipePage(recipe: _recipe),
-      ),
+      MaterialPageRoute(builder: (_) => EditRecipePage(recipe: _recipe)),
     );
 
     if (!mounted) return;
@@ -137,9 +132,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
       setState(() {
         _recipe = updated;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Recette mise à jour.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Recette mise à jour.')));
     }
   }
 
