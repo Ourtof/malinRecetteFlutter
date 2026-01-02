@@ -85,6 +85,19 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
+    /// Extrait le code d'un tag depuis son format raw
+  String _extractTagCode(String raw) {
+    final marker = 'code:';
+    final idx = raw.indexOf(marker);
+    if (idx == -1) return raw.trim();
+    
+    final start = idx + marker.length;
+    final comma = raw.indexOf(',', start);
+    final end = comma == -1 ? raw.length : comma;
+    
+    return raw.substring(start, end).trim();
+  }
+
   Future<void> _submit() async {
     if (_isSubmitting) return;
 
@@ -106,7 +119,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     final titre = _titleController.text.trim();
     final contenu = _contentController.text.trim();
-    final tags = _selectedTags.toList();
+    final tags = _selectedTags.map(_extractTagCode).toList();
 
     try {
       final illustrationId = await widget.recipeService.uploadIllustration(
@@ -410,9 +423,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     alignment: Alignment.center,
                     child: PrimaryActionButtonWidget(
                       label: "Créer la recette",
-                      onPressed: () {
-                        _isSubmitting ? null : _submit;
-                      },
+                      onPressed:
+                        _isSubmitting ? null : () => _submit(),
                     ),
                     /*child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _submit,
