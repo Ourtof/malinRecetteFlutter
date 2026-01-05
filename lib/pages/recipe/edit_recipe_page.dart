@@ -1,13 +1,14 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/recipe.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/utils/tag_helpers.dart';
+import '../../models/recipe.dart';
 
 class EditRecipePage extends StatefulWidget {
   final Recipe recipe;
@@ -23,6 +24,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
   late TextEditingController _titleCtrl;
   late TextEditingController _contentCtrl;
   bool _isSaving = false;
+  late final RecipeRepository _recipeRepository;
 
   // ---- TAGS (comme dans AddRecipePage) ----
   bool _isLoadingTags = true;
@@ -36,6 +38,9 @@ class _EditRecipePageState extends State<EditRecipePage> {
   @override
   void initState() {
     super.initState();
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _recipeRepository = RecipeRepository(apiService: apiService);
+    
     _titleCtrl = TextEditingController(text: widget.recipe.titre);
     _contentCtrl = TextEditingController(text: widget.recipe.contenu);
 
@@ -53,34 +58,6 @@ class _EditRecipePageState extends State<EditRecipePage> {
     super.dispose();
   }
 
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
-  }
-
-  // -------- Helpers tags (reprise d’AddRecipePage) --------
-
-  /// "{code: ARACHIDES, contenu: Contient arachides, categorie: ALLERGENE}"
-  /// -> "Contient arachides"
-  String _formatTagLabel(String raw) {
-    if (!raw.contains('contenu:')) return raw;
-
-    final contenuIndex = raw.indexOf('contenu:');
-    if (contenuIndex == -1) return raw;
-
-    final start = contenuIndex + 'contenu:'.length;
-    final commaIndex = raw.indexOf(',', start);
-    final end = commaIndex == -1 ? raw.length : commaIndex;
-
-    return raw.substring(start, end).trim();
-  }
-
-  bool _isObjectifTag(String raw) =>
-      raw.contains('categorie: OBJECTIF') || raw.contains('categorie:OBJECTIF');
-
-  bool _isAllergeneTag(String raw) =>
-      raw.contains('categorie: ALLERGENE') ||
-      raw.contains('categorie:ALLERGENE');
 
   Future<void> _loadTags() async {
     setState(() {
@@ -89,20 +66,12 @@ class _EditRecipePageState extends State<EditRecipePage> {
     });
 
     try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/tags');
-      final resp = await http.get(uri, headers: {'Accept': 'application/json'});
-
-      if (resp.statusCode != 200) {
-        throw Exception('HTTP ${resp.statusCode}: ${resp.body}');
-      }
-
-      final data = jsonDecode(resp.body) as List<dynamic>;
-      final tags = data.map((e) => e.toString()).toList();
+      final tags = await _recipeRepository.fetchAvailableTags();
 
       // Pré-sélection des tags de la recette existante
       final selected = <String>{};
       for (final raw in tags) {
-        final label = _formatTagLabel(raw);
+        final label = TagHelpers.formatTagLabel(raw);
         if (_initialTagContents.contains(label)) {
           selected.add(raw);
         }
@@ -151,10 +120,10 @@ class _EditRecipePageState extends State<EditRecipePage> {
     }
 
     final objectifTags = _availableTags
-        .where(_isObjectifTag)
+        .where(TagHelpers.isObjectifTag)
         .toList(growable: false);
     final allergeneTags = _availableTags
-        .where(_isAllergeneTag)
+        .where(TagHelpers.isAllergeneTag)
         .toList(growable: false);
 
     Wrap buildChips(List<String> source) {
@@ -162,7 +131,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
         spacing: 8,
         runSpacing: 8,
         children: source.map((raw) {
-          final label = _formatTagLabel(raw);
+          final label = TagHelpers.formatTagLabel(raw);
           final isSelected = _selectedTags.contains(raw);
           return FilterChip(
             label: Text(
@@ -226,67 +195,25 @@ class _EditRecipePageState extends State<EditRecipePage> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final token = await _getToken();
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Token manquant, reconnecte-toi.')),
-      );
-      return;
-    }
-
     setState(() {
       _isSaving = true;
     });
 
     try {
-      final tagCodes = _selectedTags
-          .map((raw) {
-            final reg = RegExp(r'code:\s*([A-Z_]+)');
-            final match = reg.firstMatch(raw);
-            return match?.group(1);
-          })
-          .whereType<String>()
-          .toList();
-
-      final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/recettes/${widget.recipe.id}',
+      final updatedRecipe = await _recipeRepository.updateRecipe(
+        id: widget.recipe.id,
+        titre: _titleCtrl.text.trim(),
+        contenu: _contentCtrl.text.trim(),
+        tagCodes: _selectedTags.toList(),
       );
 
-      final body = jsonEncode({
-        'titre': _titleCtrl.text.trim(),
-        'contenu': _contentCtrl.text.trim(),
-        'tagCodes': tagCodes,
-      });
-
-      final resp = await http.put(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: body,
-      );
-
-      if (resp.statusCode == 200) {
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        final updatedRecipe = Recipe.fromJson(data);
-
-        if (!mounted) return;
-        Navigator.of(context).pop(updatedRecipe);
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de la mise à jour (${resp.statusCode})'),
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.of(context).pop(updatedRecipe);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : $e')),
+      );
     } finally {
       if (!mounted) return;
       setState(() {

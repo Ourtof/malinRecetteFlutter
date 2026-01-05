@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_detail_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/add_recipe_page.dart';
+import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/utils/date_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/recipe.dart';
-import '../../../services/recipe_service.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
@@ -18,7 +20,7 @@ class RecipePage extends StatefulWidget {
 
 class _RecipePageState extends State<RecipePage> {
   final _searchController = TextEditingController();
-  late final RecipeService _recipeService;
+  late final RecipeRepository _recipeRepository;
   
   bool _isLogged = false;
   bool _isRecommending = false;
@@ -30,7 +32,8 @@ class _RecipePageState extends State<RecipePage> {
   @override
   void initState() {
     super.initState();
-    _recipeService = RecipeService(baseUrl: ApiConfig.baseUrl);
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _recipeRepository = RecipeRepository(apiService: apiService);
     _checkAuth();
     _loadRecipes();
   }
@@ -52,7 +55,7 @@ class _RecipePageState extends State<RecipePage> {
     final query = _searchController.text.trim();
 
     setState(() {
-      _futureRecipes = _recipeService.getRecipes(
+      _futureRecipes = _recipeRepository.getRecipes(
         query: query.isEmpty ? null : query,
         tag: _selectedTag,
         page: _currentPage,
@@ -64,7 +67,7 @@ class _RecipePageState extends State<RecipePage> {
   Future<void> _openAddRecipe() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => AddRecipePage(recipeService: _recipeService)),
+      MaterialPageRoute(builder: (_) => AddRecipePage(recipeRepository: _recipeRepository)),
     );
     if (result == true) _loadRecipes();
   }
@@ -75,7 +78,7 @@ class _RecipePageState extends State<RecipePage> {
     setState(() => _isRecommending = true);
 
     try {
-      final recommended = await _recipeService.getRecommendedRecipe();
+      final recommended = await _recipeRepository.getRecommendedRecipe();
       if (!mounted) return;
 
       if (recommended == null) {
@@ -86,7 +89,7 @@ class _RecipePageState extends State<RecipePage> {
         return;
       }
 
-      final recipe = await _recipeService.getRecipe(recommended.id);
+      final recipe = await _recipeRepository.getRecipe(recommended.id);
       if (!mounted) return;
 
       Navigator.push(
@@ -134,12 +137,6 @@ class _RecipePageState extends State<RecipePage> {
     _loadRecipes();
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +356,7 @@ class _RecipePageState extends State<RecipePage> {
   Widget _buildRecipeAuthor(Recipe recipe) {
     return Text(
       'par ${recipe.auteur!.pseudo}'
-      '${recipe.dateRecette != null ? " • ${_formatDate(recipe.dateRecette)}" : ""}',
+      '${recipe.dateRecette != null ? " • ${DateFormatter.formatDate(recipe.dateRecette)}" : ""}',
       style: Theme.of(context).textTheme.bodySmall,
     );
   }

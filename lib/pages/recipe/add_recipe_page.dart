@@ -1,16 +1,17 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-import '../../../services/recipe_service.dart';
+import 'package:malinrecetteflutter/utils/tag_helpers.dart';
 
 class AddRecipePage extends StatefulWidget {
-  final RecipeService recipeService;
+  final RecipeRepository recipeRepository;
 
-  const AddRecipePage({super.key, required this.recipeService});
+  const AddRecipePage({super.key, required this.recipeRepository});
 
   @override
   State<AddRecipePage> createState() => _AddRecipePageState();
@@ -46,7 +47,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
     });
 
     try {
-      final tags = await widget.recipeService.fetchAvailableTags();
+      final tags = await widget.recipeRepository.fetchAvailableTags();
       setState(() {
         _availableTags = tags;
       });
@@ -85,18 +86,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
-    /// Extrait le code d'un tag depuis son format raw
-  String _extractTagCode(String raw) {
-    final marker = 'code:';
-    final idx = raw.indexOf(marker);
-    if (idx == -1) return raw.trim();
-    
-    final start = idx + marker.length;
-    final comma = raw.indexOf(',', start);
-    final end = comma == -1 ? raw.length : comma;
-    
-    return raw.substring(start, end).trim();
-  }
 
   Future<void> _submit() async {
     if (_isSubmitting) return;
@@ -119,18 +108,17 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
     final titre = _titleController.text.trim();
     final contenu = _contentController.text.trim();
-    final tags = _selectedTags.map(_extractTagCode).toList();
 
     try {
-      final illustrationId = await widget.recipeService.uploadIllustration(
+      final illustrationId = await widget.recipeRepository.uploadIllustration(
         _pickedImageBytes!,
         _pickedImage!.name,
       );
 
-      await widget.recipeService.createRecipe(
+      await widget.recipeRepository.createRecipe(
         titre: titre,
         contenu: contenu,
-        tags: tags,
+        tagCodes: _selectedTags.toList(),
         illustrationId: illustrationId,
       );
 
@@ -149,35 +137,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
-  /// "{code: ARACHIDES, contenu: Contient arachides, categorie: ALLERGENE}"
-  /// --> "Contient arachides"
-  String _formatTagLabel(String raw) {
-    if (!raw.contains('contenu:')) return raw;
-
-    final contenuIndex = raw.indexOf('contenu:');
-    if (contenuIndex == -1) return raw;
-
-    final start = contenuIndex + 'contenu:'.length;
-    final commaIndex = raw.indexOf(',', start);
-    final end = commaIndex == -1 ? raw.length : commaIndex;
-
-    return raw.substring(start, end).trim();
-  }
-
-  bool _isObjectifTag(String raw) =>
-      raw.contains('categorie: OBJECTIF') || raw.contains('categorie:OBJECTIF');
-
-  bool _isAllergeneTag(String raw) =>
-      raw.contains('categorie: ALLERGENE') ||
-      raw.contains('categorie:ALLERGENE');
 
   @override
   Widget build(BuildContext context) {
     final objectifTags = _availableTags
-        .where(_isObjectifTag)
+        .where(TagHelpers.isObjectifTag)
         .toList(growable: false);
     final allergeneTags = _availableTags
-        .where(_isAllergeneTag)
+        .where(TagHelpers.isAllergeneTag)
         .toList(growable: false);
 
     return Scaffold(
@@ -327,7 +294,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         runSpacing: 8,
                         children: objectifTags.map((tag) {
                           final isSelected = _selectedTags.contains(tag);
-                          final label = _formatTagLabel(tag);
+                          final label = TagHelpers.formatTagLabel(tag);
                           return FilterChip(
                             label: Text(
                               label,
@@ -378,7 +345,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         runSpacing: 8,
                         children: allergeneTags.map((tag) {
                           final isSelected = _selectedTags.contains(tag);
-                          final label = _formatTagLabel(tag);
+                          final label = TagHelpers.formatTagLabel(tag);
                           return FilterChip(
                             label: Text(
                               label,

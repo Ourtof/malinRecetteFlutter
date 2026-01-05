@@ -1,11 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/utils/date_formatter.dart';
 
 import '../../models/recipe.dart';
 import 'edit_recipe_page.dart';
@@ -23,10 +23,13 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   late Recipe _recipe;
   bool _isAdmin = false;
   bool _isDeleting = false;
+  late final RecipeRepository _recipeRepository;
 
   @override
   void initState() {
     super.initState();
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _recipeRepository = RecipeRepository(apiService: apiService);
     _recipe = widget.recipe;
     _loadAdminStatus();
   }
@@ -39,12 +42,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     });
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
 
   Future<void> _deleteRecipe() async {
     final confirm = await showDialog<bool>(
@@ -69,33 +66,22 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
 
     if (confirm != true) return;
 
-    final token = await AuthService.getToken();
-    if (token == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Token manquant, reconnecte-toi.')),
-      );
-      return;
-    }
-
     setState(() {
       _isDeleting = true;
     });
 
     try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/recettes/${_recipe.id}');
-
-      final resp = await http.delete(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      // TODO: Ajouter la méthode deleteRecipe dans RecipeRepository si nécessaire
+      // Pour l'instant, on garde l'appel direct via ApiService
+      final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+      final response = await apiService.delete(
+        '/api/recettes/${_recipe.id}',
+        requiresAuth: true,
       );
 
       if (!mounted) return;
 
-      if (resp.statusCode == 204) {
+      if (response.statusCode == 204) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(
           context,
@@ -103,7 +89,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la suppression (${resp.statusCode})'),
+            content: Text('Erreur lors de la suppression (${response.statusCode})'),
           ),
         );
       }
@@ -226,7 +212,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                                 if (_recipe.auteur != null)
                                   _recipe.auteur!.pseudo,
                                 if (_recipe.dateRecette != null)
-                                  _formatDate(_recipe.dateRecette),
+                                  DateFormatter.formatDate(_recipe.dateRecette),
                               ].join(' • '),
                               style: theme.textTheme.bodyMedium,
                             ),

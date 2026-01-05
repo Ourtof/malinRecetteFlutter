@@ -1,34 +1,39 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recommended_recipe.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/recipe.dart';
+// Repository pour la gestion des recettes
+// Sépare la logique métier des appels HTTP
+class RecipeRepository {
+  final ApiService _apiService;
 
-class RecipeService {
-  final String baseUrl; //TODO : adapter l'url
+  RecipeRepository({required ApiService apiService})
+      : _apiService = apiService;
 
-  RecipeService({required this.baseUrl});
-
+  // Récupère une liste paginée de recettes
   Future<PaginatedRecipes> getRecipes({
     String? query,
     String? tag,
     int page = 1,
     int limit = 10,
   }) async {
-    final uri = Uri.parse('$baseUrl/api/recettes').replace(
-      queryParameters: {
-        if (query != null && query.isNotEmpty) 'q': query,
-        if (tag != null && tag.isNotEmpty) 'tag': tag,
-        'page': page.toString(),
-        'limit': limit.toString(),
-      },
-    );
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
 
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json'},
+    if (query != null && query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+    if (tag != null && tag.isNotEmpty) {
+      queryParams['tag'] = tag;
+    }
+
+    final response = await _apiService.get(
+      '/api/recettes',
+      queryParameters: queryParams,
     );
 
     if (response.statusCode != 200) {
@@ -41,13 +46,9 @@ class RecipeService {
     return PaginatedRecipes.fromJson(jsonBody);
   }
 
+  // Récupère une recette par son ID
   Future<Recipe> getRecipe(int id) async {
-    final uri = Uri.parse('$baseUrl/api/recettes/$id');
-
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json'},
-    );
+    final response = await _apiService.get('/api/recettes/$id');
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -61,24 +62,11 @@ class RecipeService {
 
   // Upload d'une illustration, retourne l'id créé en BDD
   Future<int> uploadIllustration(Uint8List bytes, String filename) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      throw Exception('Utilisateur non connecté');
-    }
-
-    final uri = Uri.parse('$baseUrl/api/illustrations');
-
-    final response = await http.post(
-      uri,
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/octet-stream', // ou 'image/jpeg/png'
-        'X-Filename': filename, // à lire côté Symfony
-      },
-      body: bytes,
+    final response = await _apiService.postBinary(
+      '/api/illustrations',
+      bytes: bytes,
+      filename: filename,
+      requiresAuth: true,
     );
 
     if (response.statusCode != 201) {
@@ -91,24 +79,16 @@ class RecipeService {
     return json['id'] as int;
   }
 
+  // Crée une nouvelle recette
   Future<Recipe> createRecipe({
     required String titre,
     required String contenu,
     required int illustrationId,
-    List<String> tags = const [],
+    List<String> tagCodes = const [],
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      throw Exception('Utilisateur non connecté');
-    }
-
-    final uri = Uri.parse('$baseUrl/api/recettes');
-
     // On extrait les codes à partir des strings du style
     // "{code: GLUTEN, contenu: Contient gluten, categorie: ALLERGENE}"
-    final tagCodes = tags
+    final extractedCodes = tagCodes
         .map((t) {
           final reg = RegExp(r'code:\s*([A-Z_]+)');
           final match = reg.firstMatch(t);
@@ -117,22 +97,18 @@ class RecipeService {
         .whereType<String>()
         .toList();
 
-    final body = jsonEncode({
+    final body = {
       'titre': titre,
       'contenu': contenu,
-      'tags': tags, // on garde pour compat éventuelle
-      'tagCodes': tagCodes, // ce que le back attend réellement
+      'tags': tagCodes,
+      'tagCodes': extractedCodes, // ce que le back attend réellement
       'illustrationId': illustrationId,
-    });
+    };
 
-    final response = await http.post(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+    final response = await _apiService.postJson(
+      '/api/recettes',
       body: body,
+      requiresAuth: true,
     );
 
     if (response.statusCode != 201) {
@@ -146,16 +122,51 @@ class RecipeService {
     return Recipe.fromJson(jsonBody);
   }
 
-  Future<List<String>> fetchAvailableTags() async {
-    final uri = Uri.parse('$baseUrl/api/tags');
+  // Met à jour une recette existante
+  Future<Recipe> updateRecipe({
+    required int id,
+    required String titre,
+    required String contenu,
+    List<String> tagCodes = const [],
+  }) async {
+    // On extrait les codes à partir des strings du style
+    final extractedCodes = tagCodes
+        .map((t) {
+          final reg = RegExp(r'code:\s*([A-Z_]+)');
+          final match = reg.firstMatch(t);
+          return match?.group(1);
+        })
+        .whereType<String>()
+        .toList();
 
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json'},
+    final body = {
+      'titre': titre,
+      'contenu': contenu,
+      'tagCodes': extractedCodes,
+    };
+
+    final response = await _apiService.putJson(
+      '/api/recettes/$id',
+      body: body,
+      requiresAuth: true,
     );
 
     if (response.statusCode != 200) {
-      print('Erreur tags (${response.statusCode}) : ${response.body}');
+      throw Exception(
+        'Erreur lors de la mise à jour de la recette '
+        '(${response.statusCode}) : ${response.body}',
+      );
+    }
+
+    final jsonBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return Recipe.fromJson(jsonBody);
+  }
+
+  // Récupère la liste des tags disponibles
+  Future<List<String>> fetchAvailableTags() async {
+    final response = await _apiService.get('/api/tags');
+
+    if (response.statusCode != 200) {
       throw Exception(
         'Impossible de charger les tags (${response.statusCode})',
       );
@@ -165,20 +176,11 @@ class RecipeService {
     return data.map((e) => e.toString()).toList();
   }
 
-  // API
+  // Récupère une recette recommandée pour l'utilisateur connecté
   Future<RecommendedRecipe?> getRecommendedRecipe() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      throw Exception('Utilisateur non connecté');
-    }
-
-    final uri = Uri.parse('$baseUrl/api/recettes/recommandation');
-
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    final response = await _apiService.get(
+      '/api/recettes/recommandation',
+      requiresAuth: true,
     );
 
     if (response.statusCode == 200) {
@@ -197,3 +199,4 @@ class RecipeService {
     );
   }
 }
+

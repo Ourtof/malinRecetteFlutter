@@ -4,7 +4,7 @@ import 'package:malinrecetteflutter/pages/admin/admin_user_list_page.dart';
 import 'package:malinrecetteflutter/pages/contact/contact.dart';
 import 'package:malinrecetteflutter/pages/mentions_legales/mentions_legales_page.dart';
 import 'package:malinrecetteflutter/pages/profile/profile_page.dart';
-import 'package:malinrecetteflutter/pages/HomePage/home_page.dart';
+import 'package:malinrecetteflutter/pages/home_page/home_page.dart';
 import 'package:malinrecetteflutter/pages/login/login_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_page.dart';
 import 'package:malinrecetteflutter/pages/register/register_page.dart';
