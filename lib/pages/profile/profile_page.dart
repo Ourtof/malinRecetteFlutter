@@ -277,11 +277,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: OutlinedButton.icon(
-                      onPressed: _isLoadingFoodProfile
+                      onPressed: (_isLoadingFoodProfile || _isSavingFoodProfile)
                           ? null
                           : _openFoodProfileDialog,
-                      icon: const Icon(Icons.restaurant_menu, size: 18),
-                      label: const Text('Modifier le profil alimentaire'),
+                      icon: _isSavingFoodProfile
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.restaurant_menu, size: 18),
+                      label: Text(
+                        _isSavingFoodProfile
+                            ? 'Enregistrement...'
+                            : 'Modifier le profil alimentaire',
+                      ),
                     ),
                   ),
                 ],
