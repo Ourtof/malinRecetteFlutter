@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/constants/food_profile_constants.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
-import 'package:malinrecetteflutter/pages/profile/edit_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart';
 import 'package:malinrecetteflutter/repositories/user_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
-import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-import 'package:malinrecetteflutter/ui/widget/profile_information.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/food_profile_summary_card.dart';
+import 'package:malinrecetteflutter/ui/widget/profile/profile_name_email.dart';
+import 'package:malinrecetteflutter/ui/widget/profile/profile_card.dart';
+import 'package:malinrecetteflutter/ui/widget/profile/profile_edit_button.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -102,11 +102,38 @@ class _ProfilePageState extends State<ProfilePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 16),
-                          _buildNameAndEmail(),
+                          ProfileNameEmail(
+                            pseudo: user!['pseudo'] ?? 'Utilisateur',
+                            email: user!['email'],
+                          ),
                           const SizedBox(height: 24),
-                          _buildProfileCard(),
+                          ProfileCard(
+                            prenom: user!['prenom'] ?? '',
+                            nom: user!['nom'] ?? '',
+                            pseudo: user!['pseudo'] ?? '',
+                          ),
                           const SizedBox(height: 16),
-                          _buildEditButton(),
+                          ProfileEditButton(
+                            isUpdating: _isUpdating,
+                            user: user!,
+                            onUpdate: ({
+                              required String prenom,
+                              required String nom,
+                              required String pseudo,
+                              required String email,
+                              required String adresse,
+                              required String ville,
+                              required String codePostal,
+                            }) => _updateProfile(
+                              prenom: prenom,
+                              nom: nom,
+                              pseudo: pseudo,
+                              email: email,
+                              adresse: adresse,
+                              ville: ville,
+                              codePostal: codePostal,
+                            ),
+                          ),
                           const SizedBox(height: 24),
                           FoodProfileSummaryCard(
                             isLoading: _isLoadingFoodProfile,
@@ -134,96 +161,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildNameAndEmail() {
-    return Column(
-      children: [
-        Text(
-          user!['pseudo'] ?? 'Utilisateur',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          user!['email'],
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileCard() {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-        child: Column(
-          children: [
-            ProfileInformation(label: 'Prénom', value: user!['prenom']),
-            ProfileInformation(label: 'Nom', value: user!['nom']),
-            ProfileInformation(label: 'Pseudo', value: user!['pseudo']),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        OutlinedButton.icon(
-          onPressed: _isUpdating
-              ? null
-              : () async {
-                  final result = await showEditProfileDialog(
-                    context,
-                    initialPrenom: user?['prenom'] ?? '',
-                    initialNom: user?['nom'] ?? '',
-                    initialPseudo: user?['pseudo'] ?? '',
-                    initialEmail: user?['email'] ?? '',
-                    initialPassword: '',
-                    initialAdresse: user?['adresse'] ?? '',
-                    initialVille: user?['ville'] ?? '',
-                    initialCodePostal: (user?['codePostal']?.toString()) ?? '',
-                  );
-
-                  if (result != null) {
-                    await _updateProfile(
-                      prenom: result.prenom,
-                      nom: result.nom,
-                      pseudo: result.pseudo,
-                      email: result.email,
-                      adresse: result.adresse,
-                      ville: result.ville,
-                      codePostal: result.codePostal,
-                    );
-                  }
-                },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            side: BorderSide(color: AppColors.neutral60),
-          ),
-          icon: _isUpdating
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Icon(Icons.edit, size: 18, color: AppColors.neutral60),
-          label: Text(
-            'Modifier le profil',
-            style: TextStyle(
-              color: AppColors.neutral60,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
 
   Future<void> _openFoodProfileDialog() async {

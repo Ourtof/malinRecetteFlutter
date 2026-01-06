@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
-import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_detail_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/add_recipe_page.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
-import 'package:malinrecetteflutter/ui/widget/recipe/recipe_grid.dart';
-import 'package:malinrecetteflutter/ui/widget/recipe/recipe_pagination.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_floating_buttons.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_list.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_search_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_filter_reset.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
@@ -144,15 +145,44 @@ class _RecipePageState extends State<RecipePage> {
       appBar: const HeaderBar(height: 88),
       bottomNavigationBar: const FooterWidget(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _buildFloatingButtons(),
+      floatingActionButton: RecipeFloatingButtons(
+        isLogged: _isLogged,
+        isRecommending: _isRecommending,
+        onRecommend: _recommendRecipe,
+        onAdd: _openAddRecipe,
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),
           child: Column(
             children: [
-              _buildSearchBar(),
-              if (_selectedTag != null) _buildFilterReset(),
-              Expanded(child: _buildRecipesList()),
+              RecipeSearchBar(
+                controller: _searchController,
+                onClear: _clearSearch,
+                onSubmitted: () => _loadRecipes(),
+              ),
+              if (_selectedTag != null)
+                RecipeFilterReset(
+                  onReset: _clearFilters,
+                ),
+              Expanded(
+                child: RecipeList(
+                  futureRecipes: _futureRecipes,
+                  selectedTag: _selectedTag,
+                  currentPage: _currentPage,
+                  onTagTap: _toggleTag,
+                  onPageChange: (page) => _loadRecipes(page: page),
+                  onRecipeTap: (recipe, currentPage) async {
+                    final deleted = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RecipeDetailPage(recipe: recipe),
+                      ),
+                    );
+                    if (deleted == true) _loadRecipes(page: currentPage);
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -160,124 +190,5 @@ class _RecipePageState extends State<RecipePage> {
     );
   }
 
-  Widget? _buildFloatingButtons() {
-    if (!_isLogged) return null;
-
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            FloatingActionButton.extended(
-              heroTag: 'recommend_fab',
-              onPressed: _isRecommending ? null : _recommendRecipe,
-              label: const Text("Me proposer une recette"),
-            ),
-            FloatingActionButton(
-              heroTag: 'add_fab',
-              onPressed: _openAddRecipe,
-              child: const Icon(Icons.add),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Rechercher une recette...',
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: _clearSearch,
-          ),
-        ),
-        onSubmitted: (_) => _loadRecipes(),
-      ),
-    );
-  }
-
-  Widget _buildFilterReset() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton.icon(
-          onPressed: _clearFilters,
-          icon: const Icon(Icons.filter_alt_off, size: 16),
-          label: const Text(
-            'Réinitialiser les filtres',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            visualDensity: VisualDensity.compact,
-            backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.06),
-            foregroundColor: Theme.of(context).colorScheme.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(999),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecipesList() {
-    return FutureBuilder<PaginatedRecipes>(
-      future: _futureRecipes,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Erreur : ${snapshot.error}'));
-        }
-
-        final data = snapshot.data;
-        if (data == null || data.items.isEmpty) {
-          return const Center(child: Text('Aucune recette trouvée.'));
-        }
-
-        return Column(
-          children: [
-            Expanded(
-              child: RecipeGrid(
-                recipes: data.items,
-                selectedTag: _selectedTag,
-                onTagTap: _toggleTag,
-                onRecipeTap: (recipe) async {
-                  final deleted = await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RecipeDetailPage(recipe: recipe),
-                    ),
-                  );
-                  if (deleted == true) _loadRecipes(page: _currentPage);
-                },
-              ),
-            ),
-            RecipePagination(
-              data: data,
-              currentPage: _currentPage,
-              onPageChange: (page) => _loadRecipes(page: page),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
 }
