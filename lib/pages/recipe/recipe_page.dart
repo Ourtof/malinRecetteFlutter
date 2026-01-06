@@ -365,24 +365,48 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   Widget _buildRecipeTags(List<RecipeTag> tags) {
+    // Limite le nombre de tags affichés pour éviter que la carte devienne trop haute
+    const maxVisibleTags = 3;
+    final visibleTags = tags.take(maxVisibleTags).toList();
+    final remainingCount = tags.length - maxVisibleTags;
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Wrap(
-        spacing: 4,
-        runSpacing: -8,
-        children: tags.map((tag) {
-          final isSelected = tag.contenu == _selectedTag;
-          return ActionChip(
-            label: Text(
-              tag.contenu,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          ...visibleTags.map((tag) {
+            final isSelected = tag.contenu == _selectedTag;
+            return ActionChip(
+              label: Text(
+                tag.contenu,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
+              onPressed: () => _toggleTag(tag.contenu),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            );
+          }),
+          if (remainingCount > 0)
+            Chip(
+              label: Text(
+                '+$remainingCount',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
             ),
-            onPressed: () => _toggleTag(tag.contenu),
-          );
-        }).toList(),
+        ],
       ),
     );
   }
