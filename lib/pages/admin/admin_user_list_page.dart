@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/models/admin_user.dart';
+import 'package:malinrecetteflutter/repositories/admin_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminUserListPage extends StatefulWidget {
   const AdminUserListPage({super.key});
@@ -25,9 +22,14 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
   String _search = '';
   final TextEditingController _searchController = TextEditingController();
 
+  late final AdminRepository _adminRepository;
+
   @override
   void initState() {
     super.initState();
+    _adminRepository = AdminRepository(
+      apiService: ApiServiceFactory.create(),
+    );
     _searchController.addListener(() {
       // croix
       setState(() {});
@@ -41,11 +43,6 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     super.dispose();
   }
 
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
-  }
-
   Future<void> _loadUsers({String? search}) async {
     final effectiveSearch = search ?? _search;
 
@@ -55,56 +52,16 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     });
 
     try {
-      final token = await _getToken();
-      if (token == null) {
-        if (!mounted) return;
-        setState(() {
-          _error = 'Token introuvable. Merci de te reconnecter.';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      final queryParams = <String, String>{};
-      if (effectiveSearch.isNotEmpty) {
-        queryParams['search'] = effectiveSearch;
-      }
-
-      final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/admin/user',
-      ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-
-      final response = await http.get(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+      final users = await _adminRepository.getUsers(
+        search: effectiveSearch.isNotEmpty ? effectiveSearch : null,
       );
 
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-        final List<dynamic> rawList = (data is List)
-            ? data
-            : (data['items'] as List<dynamic>);
-
-        final users = rawList
-            .map((e) => AdminUser.fromJson(e as Map<String, dynamic>))
-            .toList();
-
-        if (!mounted) return;
-        setState(() {
-          _users = users;
-          _isLoading = false;
-          _search = effectiveSearch;
-        });
-      } else {
-        if (!mounted) return;
-        setState(() {
-          _error = 'Erreur serveur (${response.statusCode}) : ${response.body}';
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _users = users;
+        _isLoading = false;
+        _search = effectiveSearch;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -122,50 +79,22 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     });
 
     try {
-      final token = await _getToken();
-      if (token == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Token manquant, reconnecte-toi.')),
-        );
-        return;
-      }
-
-      final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/admin/user/${user.id}/toggle-enabled',
+      final updatedUser = await _adminRepository.toggleUserEnabled(
+        user.id,
+        newStatus,
       );
-      final response = await http.patch(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'enabled': newStatus}),
-      );
-      if (response.statusCode == 200) {
-        final updatedJson = jsonDecode(response.body) as Map<String, dynamic>;
-        final updatedUser = AdminUser.fromJson(updatedJson);
 
-        if (!mounted) return;
-        setState(() {
-          _users = _users
-              .map((u) => u.id == updatedUser.id ? updatedUser : u)
-              .toList();
-        });
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Échec de la mise à jour (${response.statusCode}).'),
-          ),
-        );
-      }
+      if (!mounted) return;
+      setState(() {
+        _users = _users
+            .map((u) => u.id == updatedUser.id ? updatedUser : u)
+            .toList();
+      });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : $e')),
+      );
     } finally {
       if (!mounted) return;
       setState(() {

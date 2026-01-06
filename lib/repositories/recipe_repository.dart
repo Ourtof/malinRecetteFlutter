@@ -4,6 +4,7 @@ import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recommended_recipe.dart';
+import 'package:malinrecetteflutter/utils/tag_helpers.dart';
 
 // Repository pour la gestion des recettes
 // Sépare la logique métier des appels HTTP
@@ -90,12 +91,8 @@ class RecipeRepository {
     // On extrait les codes à partir des strings du style
     // "{code: GLUTEN, contenu: Contient gluten, categorie: ALLERGENE}"
     final extractedCodes = tagCodes
-        .map((t) {
-          final reg = RegExp(r'code:\s*([A-Z_]+)');
-          final match = reg.firstMatch(t);
-          return match?.group(1);
-        })
-        .whereType<String>()
+        .map((t) => TagHelpers.extractTagCode(t))
+        .where((code) => code.isNotEmpty)
         .toList();
 
     final body = {
@@ -132,12 +129,8 @@ class RecipeRepository {
   }) async {
     // On extrait les codes à partir des strings du style
     final extractedCodes = tagCodes
-        .map((t) {
-          final reg = RegExp(r'code:\s*([A-Z_]+)');
-          final match = reg.firstMatch(t);
-          return match?.group(1);
-        })
-        .whereType<String>()
+        .map((t) => TagHelpers.extractTagCode(t))
+        .where((code) => code.isNotEmpty)
         .toList();
 
     final body = {

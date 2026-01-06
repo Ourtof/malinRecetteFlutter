@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/api/api_service.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/constants/food_profile_constants.dart';
 import 'package:malinrecetteflutter/pages/profile/edit_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_dialog.dart';
@@ -43,8 +40,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
-    _userRepository = UserRepository(apiService: apiService);
+    _userRepository = UserRepository(
+      apiService: ApiServiceFactory.create(),
+    );
     loadProfile();
     loadFoodProfile();
   }

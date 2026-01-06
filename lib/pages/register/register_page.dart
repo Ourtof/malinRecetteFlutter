@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/api/api_service.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
@@ -30,8 +29,9 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
-    _authRepository = AuthRepository(apiService: apiService);
+    _authRepository = AuthRepository(
+      apiService: ApiServiceFactory.create(),
+    );
   }
 
   Future<void> register() async {

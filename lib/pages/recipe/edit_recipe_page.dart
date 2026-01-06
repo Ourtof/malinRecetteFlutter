@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/api/api_service.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
@@ -37,8 +36,9 @@ class _EditRecipePageState extends State<EditRecipePage> {
   @override
   void initState() {
     super.initState();
-    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
-    _recipeRepository = RecipeRepository(apiService: apiService);
+    _recipeRepository = RecipeRepository(
+      apiService: ApiServiceFactory.create(),
+    );
     
     _titleCtrl = TextEditingController(text: widget.recipe.titre);
     _contentCtrl = TextEditingController(text: widget.recipe.contenu);

@@ -110,6 +110,25 @@ class ApiService {
     );
   }
 
+  // PATCH request avec JSON
+  Future<http.Response> patchJson(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    bool requiresAuth = false,
+  }) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final headers = await _buildHeaders(
+      additionalHeaders: {'Content-Type': 'application/json'},
+      requiresAuth: requiresAuth,
+    );
+
+    return await http.patch(
+      uri,
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
+  }
+
   // DELETE request
   Future<http.Response> delete(
     String endpoint, {

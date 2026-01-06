@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/api/api_service.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
@@ -28,8 +27,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   @override
   void initState() {
     super.initState();
-    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
-    _recipeRepository = RecipeRepository(apiService: apiService);
+    _recipeRepository = RecipeRepository(
+      apiService: ApiServiceFactory.create(),
+    );
     _recipe = widget.recipe;
     _loadAdminStatus();
   }
