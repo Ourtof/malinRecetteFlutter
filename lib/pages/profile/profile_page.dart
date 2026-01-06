@@ -101,7 +101,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          //_buildAvatar(),
                           const SizedBox(height: 16),
                           _buildNameAndEmail(),
                           const SizedBox(height: 24),
@@ -123,28 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
       ),
       bottomNavigationBar: const FooterWidget(),
-    );
-  }
-
-  // --- UI blocs existants ---
-
-  Widget _buildAvatar() {
-    // <= pas utilisé tant qu'on a pas fix l'avatar
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: const CircleAvatar(
-        radius: 45,
-        backgroundImage: AssetImage('assets/img/default_avatar.png'),
-      ),
     );
   }
 
