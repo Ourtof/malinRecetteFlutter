@@ -7,6 +7,7 @@ import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart'
 import 'package:malinrecetteflutter/repositories/user_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/food_profile_summary_card.dart';
@@ -116,22 +117,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           ProfileEditButton(
                             isUpdating: _isUpdating,
                             user: user!,
-                            onUpdate: ({
-                              required String prenom,
-                              required String nom,
-                              required String pseudo,
-                              required String email,
-                              required String adresse,
-                              required String ville,
-                              required String codePostal,
-                            }) => _updateProfile(
-                              prenom: prenom,
-                              nom: nom,
-                              pseudo: pseudo,
-                              email: email,
-                              adresse: adresse,
-                              ville: ville,
-                              codePostal: codePostal,
+                            onUpdate: (result) => _updateProfile(
+                              prenom: result.prenom,
+                              nom: result.nom,
+                              pseudo: result.pseudo,
+                              email: result.email,
+                              adresse: result.adresse,
+                              ville: result.ville,
+                              codePostal: result.codePostal,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -249,11 +242,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _isSavingFoodProfile = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profil alimentaire mis à jour avec succès'),
-          backgroundColor: Colors.green,
-        ),
+      SnackbarHelpers.showSuccess(
+        context,
+        'Profil alimentaire mis à jour avec succès',
       );
     } catch (e) {
       if (!mounted) return;
@@ -263,12 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
             'Erreur réseau lors de la sauvegarde du profil alimentaire : $e';
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_foodProfileError!),
-          backgroundColor: Colors.red,
-        ),
-      );
+      SnackbarHelpers.showError(context, _foodProfileError!);
     }
   }
 
@@ -306,12 +292,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _isUpdating = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profil mis à jour avec succès'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      SnackbarHelpers.showSuccess(context, 'Profil mis à jour avec succès');
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -319,9 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
         error = ErrorHelpers.extractErrorMessage(e);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error!), backgroundColor: Colors.red),
-      );
+      SnackbarHelpers.showError(context, error!);
     }
   }
 

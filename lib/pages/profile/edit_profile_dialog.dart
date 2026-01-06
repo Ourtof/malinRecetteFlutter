@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 
 class EditProfileResult {
   final String prenom;
@@ -100,13 +101,9 @@ Future<EditProfileResult?> showEditProfileDialog(
                   nomController.text.trim().isEmpty ||
                   pseudoController.text.trim().isEmpty ||
                   emailController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Veuillez remplir tous les champs obligatoires',
-                    ),
-                    backgroundColor: Colors.orange,
-                  ),
+                SnackbarHelpers.showError(
+                  context,
+                  'Veuillez remplir tous les champs obligatoires',
                 );
                 return;
               }

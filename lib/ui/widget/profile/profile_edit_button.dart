@@ -5,15 +5,7 @@ import 'package:malinrecetteflutter/pages/profile/edit_profile_dialog.dart';
 class ProfileEditButton extends StatelessWidget {
   final bool isUpdating;
   final Map<String, dynamic> user;
-  final Function({
-    required String prenom,
-    required String nom,
-    required String pseudo,
-    required String email,
-    required String adresse,
-    required String ville,
-    required String codePostal,
-  }) onUpdate;
+  final Function(EditProfileResult) onUpdate;
 
   const ProfileEditButton({
     super.key,
@@ -44,15 +36,7 @@ class ProfileEditButton extends StatelessWidget {
                   );
 
                   if (result != null) {
-                    onUpdate(
-                      prenom: result.prenom,
-                      nom: result.nom,
-                      pseudo: result.pseudo,
-                      email: result.email,
-                      adresse: result.adresse,
-                      ville: result.ville,
-                      codePostal: result.codePostal,
-                    );
+                    onUpdate(result);
                   }
                 },
           style: OutlinedButton.styleFrom(

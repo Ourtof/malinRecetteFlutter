@@ -11,6 +11,9 @@ import 'package:malinrecetteflutter/ui/widget/recipe/recipe_filter_reset.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/utils/navigation_helpers.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
+import 'package:malinrecetteflutter/utils/string_helpers.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
@@ -57,7 +60,7 @@ class _RecipePageState extends State<RecipePage> {
 
     setState(() {
       _futureRecipes = _recipeRepository.getRecipes(
-        query: query.isEmpty ? null : query,
+        query: StringHelpers.nullIfEmpty(query),
         tag: _selectedTag,
         page: _currentPage,
         limit: 6,
@@ -66,9 +69,9 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   Future<void> _openAddRecipe() async {
-    final result = await Navigator.push<bool>(
+    final result = await NavigationHelpers.push<bool>(
       context,
-      MaterialPageRoute(builder: (_) => AddRecipePage(recipeRepository: _recipeRepository)),
+      AddRecipePage(recipeRepository: _recipeRepository),
     );
     if (result == true) _loadRecipes();
   }
@@ -83,23 +86,21 @@ class _RecipePageState extends State<RecipePage> {
       if (!mounted) return;
 
       if (recommended == null) {
-        _showSnackBar(
-          "Aucune recette ne correspond à ton profil. "
-          "Modifie ton profil ou ajoute de nouvelles recettes.",
-        );
+      SnackbarHelpers.showInfo(
+        context,
+        "Aucune recette ne correspond à ton profil. "
+        "Modifie ton profil ou ajoute de nouvelles recettes.",
+      );
         return;
       }
 
       final recipe = await _recipeRepository.getRecipe(recommended.id);
       if (!mounted) return;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => RecipeDetailPage(recipe: recipe)),
-      );
+      NavigationHelpers.push(context, RecipeDetailPage(recipe: recipe));
     } catch (e) {
       if (!mounted) return;
-      _showSnackBar(_getErrorMessage(e.toString()));
+      SnackbarHelpers.showError(context, _getErrorMessage(e.toString()));
     } finally {
       if (mounted) setState(() => _isRecommending = false);
     }
@@ -117,9 +118,6 @@ class _RecipePageState extends State<RecipePage> {
     return "Impossible de te proposer une recette pour le moment. Réessaie plus tard.";
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
 
   void _clearSearch() {
     _searchController.clear();
@@ -173,11 +171,9 @@ class _RecipePageState extends State<RecipePage> {
                   onTagTap: _toggleTag,
                   onPageChange: (page) => _loadRecipes(page: page),
                   onRecipeTap: (recipe, currentPage) async {
-                    final deleted = await Navigator.push<bool>(
+                    final deleted = await NavigationHelpers.push<bool>(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => RecipeDetailPage(recipe: recipe),
-                      ),
+                      RecipeDetailPage(recipe: recipe),
                     );
                     if (deleted == true) _loadRecipes(page: currentPage);
                   },

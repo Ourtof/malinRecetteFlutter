@@ -3,6 +3,8 @@ import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
+import 'package:malinrecetteflutter/utils/navigation_helpers.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/date_formatter.dart';
@@ -76,17 +78,12 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Recette supprimée.')));
+      SnackbarHelpers.showInfo(context, 'Recette supprimée.');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      SnackbarHelpers.showError(
         context,
-      ).showSnackBar(
-        SnackBar(
-          content: Text('Erreur : ${ErrorHelpers.extractErrorMessage(e)}'),
-        ),
+        'Erreur : ${ErrorHelpers.extractErrorMessage(e)}',
       );
     } finally {
       if (!mounted) return;
@@ -97,9 +94,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   }
 
   Future<void> _editRecipe() async {
-    final updated = await Navigator.push<Recipe>(
+    final updated = await NavigationHelpers.push<Recipe>(
       context,
-      MaterialPageRoute(builder: (_) => EditRecipePage(recipe: _recipe)),
+      EditRecipePage(recipe: _recipe),
     );
 
     if (!mounted) return;
