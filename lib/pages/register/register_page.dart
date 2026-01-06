@@ -6,6 +6,8 @@ import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widg
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
+import '../../constants/app_colors.dart';
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -145,7 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         Text(
                           message!,
                           style: const TextStyle(
-                            color: Colors.red,
+                            color: AppColors.error,
                             fontSize: 16,
                           ),
                           textAlign: TextAlign.center,

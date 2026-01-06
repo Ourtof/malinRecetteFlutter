@@ -102,7 +102,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_tagsLoadError!, style: const TextStyle(color: Colors.red)),
+          Text(_tagsLoadError!, style: const TextStyle(color: AppColors.error)),
           TextButton(
             onPressed: _loadTags,
             child: const Text('Recharger les tags'),
@@ -155,7 +155,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
             selectedColor: AppColors.neutral60.withOpacity(0.18),
             shape: StadiumBorder(
               side: BorderSide(
-                color: AppColors.neutral60, // orange border
+                color: AppColors.neutral60,
               ),
             ),
           );

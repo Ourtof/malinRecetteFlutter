@@ -15,6 +15,8 @@ import 'package:malinrecetteflutter/ui/widget/profile/profile_name_email.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_card.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_edit_button.dart';
 
+import '../../constants/app_colors.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -89,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(24.0),
         child: error != null
             ? Center(
-                child: Text(error!, style: const TextStyle(color: Colors.red)),
+                child: Text(error!, style: const TextStyle(color: AppColors.error)),
               )
             : user == null
             ? const Center(child: CircularProgressIndicator())

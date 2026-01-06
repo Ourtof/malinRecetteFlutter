@@ -163,7 +163,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   if (_errorMessage != null) ...[
                     Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: AppColors.error),
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -223,7 +223,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                 child: const Icon(
                                   Icons.image_outlined,
                                   size: 28,
-                                  color: Colors.grey,
+                                  color: AppColors.neutral50,
                                 ),
                               )
                             : Image.memory(
@@ -267,7 +267,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   ] else if (_tagsLoadError != null) ...[
                     Text(
                       _tagsLoadError!,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: AppColors.error),
                     ),
                     TextButton(
                       onPressed: _loadTags,

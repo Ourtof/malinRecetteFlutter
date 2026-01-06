@@ -119,7 +119,7 @@ class _ContactPageState extends State<ContactPage> {
                   const SizedBox(height: 24),
 
                   if (_error != null) ...[
-                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                    Text(_error!, style: const TextStyle(color: AppColors.error)),
                     const SizedBox(height: 16),
                   ],
 

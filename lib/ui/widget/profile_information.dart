@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_colors.dart';
+
 class ProfileInformation extends StatelessWidget {
   final String label;
   final String? value;
@@ -12,7 +14,7 @@ class ProfileInformation extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(value ?? '-', style: const TextStyle(color: Colors.black54)),
+          Text(value ?? '-', style: const TextStyle(color: AppColors.black)),
         ],
       ),
     );

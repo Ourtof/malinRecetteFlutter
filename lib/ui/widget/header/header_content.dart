@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/navlink_widget.dart';
 
+import '../../../constants/app_colors.dart';
+
 class HeaderContent extends StatefulWidget {
   final double height;
   const HeaderContent({super.key, required this.height});
@@ -88,7 +90,7 @@ class _HeaderContentState extends State<HeaderContent> {
                 borderRadius: BorderRadius.circular(8),
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.account_circle, color: Colors.black),
+                  child: Icon(Icons.account_circle, color: AppColors.black),
                 ),
               ),
               const SizedBox(width: 24),

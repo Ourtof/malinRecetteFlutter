@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_colors.dart';
+
 class NavLink extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
@@ -15,7 +17,7 @@ class NavLink extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(
           label,
-          style: const TextStyle(color: Colors.black, fontSize: 18),
+          style: const TextStyle(color: AppColors.black, fontSize: 18),
         ),
       ),
     );

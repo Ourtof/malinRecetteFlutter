@@ -28,7 +28,7 @@ class PrimaryActionButtonWidget extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
               ),
             )
           : Text(label, style: const TextStyle(fontSize: 16)),

@@ -9,6 +9,7 @@ import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/date_formatter.dart';
 
+import '../../constants/app_colors.dart';
 import '../../models/recipe.dart';
 import 'edit_recipe_page.dart';
 
@@ -181,7 +182,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         blurRadius: 8,
                         spreadRadius: 1,
                         offset: const Offset(0, 2),
-                        color: Colors.black.withOpacity(0.06),
+                        color: AppColors.black.withOpacity(0.06),
                       ),
                     ],
                   ),

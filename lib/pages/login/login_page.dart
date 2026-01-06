@@ -6,6 +6,8 @@ import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widg
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
+import '../../constants/app_colors.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -121,10 +123,10 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.06),
+                          color: AppColors.error.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.red.withOpacity(0.4),
+                            color: AppColors.error.withOpacity(0.4),
                           ),
                         ),
                         child: Row(
@@ -133,14 +135,14 @@ class _LoginPageState extends State<LoginPage> {
                             const Icon(
                               Icons.error_outline,
                               size: 20,
-                              color: Colors.red,
+                              color: AppColors.error,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 message!,
                                 style: const TextStyle(
-                                  color: Colors.red,
+                                  color: AppColors.error,
                                   fontSize: 13,
                                 ),
                               ),

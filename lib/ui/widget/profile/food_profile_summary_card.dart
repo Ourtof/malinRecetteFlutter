@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../constants/app_colors.dart';
+
 class FoodProfileSummaryCard extends StatelessWidget {
   final bool isLoading;
   final String? error;
@@ -42,7 +44,7 @@ class FoodProfileSummaryCard extends StatelessWidget {
                   if (error != null) ...[
                     Text(
                       error!,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: AppColors.error),
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -89,7 +91,7 @@ class FoodProfileSummaryCard extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.black87)),
+          child: Text(value, style: const TextStyle(color: AppColors.black)),
         ),
       ],
     );

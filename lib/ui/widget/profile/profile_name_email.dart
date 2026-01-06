@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../constants/app_colors.dart';
+
 class ProfileNameEmail extends StatelessWidget {
   final String pseudo;
   final String email;
@@ -21,7 +23,7 @@ class ProfileNameEmail extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           email,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
+          style: const TextStyle(fontSize: 16, color: AppColors.neutral50),
         ),
       ],
     );

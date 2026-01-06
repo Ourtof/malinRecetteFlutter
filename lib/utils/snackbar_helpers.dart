@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+
 // Helpers pour Snackbar
 class SnackbarHelpers {
   // SnackBar de succès (vert)
@@ -7,7 +9,7 @@ class SnackbarHelpers {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -17,7 +19,7 @@ class SnackbarHelpers {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ),
     );
   }
