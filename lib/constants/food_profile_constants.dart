@@ -14,10 +14,5 @@ const Map<String, String> kAllergyLabels = {
   'GLUTEN': 'Gluten',
   'LAITAGE': 'Produits laitiers',
   'ARACHIDES': 'Arachides',
-  'FRUITS_A_COQUE': 'Fruits à coque',
-  'OEUF': 'Œuf',
-  'SOJA': 'Soja',
-  'POISSON': 'Poisson',
-  'CRUSTACES': 'Crustacés',
 };
 

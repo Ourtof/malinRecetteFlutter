@@ -314,10 +314,12 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
         // ---- Tableau ----
         Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          child: Scrollbar(
+            thumbVisibility: true,
             child: SingleChildScrollView(
-              child: DataTable(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                child: DataTable(
                   columnSpacing: 32,
                   headingTextStyle: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w700,
@@ -370,6 +372,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
               ),
             ),
           ),
+        ),
       ],
     );
   }
