@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/constants/app_colors.dart';
 
 class PrimaryActionButtonWidget extends StatelessWidget {
   final String label;

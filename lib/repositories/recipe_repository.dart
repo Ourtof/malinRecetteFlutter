@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/models/paginated_recipes.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recommended_recipe.dart';
 

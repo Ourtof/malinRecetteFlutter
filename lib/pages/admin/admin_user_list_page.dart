@@ -3,53 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/models/admin_user.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class AdminUser {
-  final int id;
-  final String email;
-  final String pseudo;
-  final List<String> roles;
-  final bool enabled;
-
-  const AdminUser({
-    required this.id,
-    required this.email,
-    required this.pseudo,
-    required this.roles,
-    required this.enabled,
-  });
-
-  factory AdminUser.fromJson(Map<String, dynamic> json) {
-    return AdminUser(
-      id: json['id'] as int,
-      email: json['email'] as String? ?? '',
-      pseudo: json['pseudo'] as String? ?? '',
-      roles: (json['roles'] as List<dynamic>? ?? [])
-          .map((e) => e.toString())
-          .toList(),
-      enabled: json['enabled'] as bool? ?? false,
-    );
-  }
-
-  AdminUser copyWith({
-    int? id,
-    String? email,
-    String? pseudo,
-    List<String>? roles,
-    bool? enabled,
-  }) {
-    return AdminUser(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      pseudo: pseudo ?? this.pseudo,
-      roles: roles ?? this.roles,
-      enabled: enabled ?? this.enabled,
-    );
-  }
-}
 
 class AdminUserListPage extends StatefulWidget {
   const AdminUserListPage({super.key});
@@ -357,12 +314,10 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
         // ---- Tableau ----
         Expanded(
-          child: Scrollbar(
-            thumbVisibility: true,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                child: DataTable(
+              child: DataTable(
                   columnSpacing: 32,
                   headingTextStyle: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w700,
@@ -415,7 +370,6 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
               ),
             ),
           ),
-        ),
       ],
     );
   }

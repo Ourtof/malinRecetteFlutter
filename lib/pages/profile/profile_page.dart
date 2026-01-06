@@ -1,40 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/constants/food_profile_constants.dart';
 import 'package:malinrecetteflutter/pages/profile/edit_profile_dialog.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/pages/profile/food_profile_dialog.dart';
+import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart';
+import 'package:malinrecetteflutter/repositories/user_repository.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/profile_information.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-// --- Constantes communes profil alimentaire ---
-
-const Map<String, String> kGoalTypeLabels = {
-  'CLASSIQUE': 'Manger normalement',
-  'SPORTIF': 'Prendre du muscle',
-  'MINCEUR': 'Perdre du poids',
-};
-
-const Map<String, String> kDietTypeLabels = {
-  'CLASSIQUE': 'Classique',
-  'VEGETARIEN': 'Végétarien',
-};
-
-const Map<String, String> kAllergyLabels = {
-  'GLUTEN': 'Gluten',
-  'LAITAGE': 'Produits laitiers',
-  'ARACHIDES': 'Arachides',
-  'FRUITS_A_COQUE': 'Fruits à coque',
-  'OEUF': 'Œuf',
-  'SOJA': 'Soja',
-  'POISSON': 'Poisson',
-  'CRUSTACES': 'Crustacés',
-};
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -47,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? user;
   String? error;
   bool _isUpdating = false;
+  late final UserRepository _userRepository;
 
   // ---- Profil alimentaire ----
   bool _isLoadingFoodProfile = true;
@@ -63,6 +43,8 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _userRepository = UserRepository(apiService: apiService);
     loadProfile();
     loadFoodProfile();
   }
@@ -328,9 +310,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _openFoodProfileDialog() async {
-    final result = await showDialog<_FoodProfileEditResult>(
+    final result = await showDialog<FoodProfileEditResult>(
       context: context,
-      builder: (context) => _FoodProfileDialog(
+      builder: (context) => FoodProfileDialog(
         initialGoalType: _goalType,
         initialDietType: _dietType,
         initialIsHalal: _isHalal,
@@ -355,149 +337,70 @@ class _ProfilePageState extends State<ProfilePage> {
   // --------- API ---------
 
   Future<void> loadProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      setState(() => error = 'Utilisateur non connecté.');
-      return;
-    }
-
     try {
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/user'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        setState(() => user = jsonDecode(response.body));
-      } else {
-        setState(
-          () => error = 'Erreur : ${response.statusCode} — ${response.body}',
-        );
-      }
+      final profileData = await _userRepository.getProfile();
+      setState(() => user = profileData);
     } catch (e) {
-      setState(() => error = 'Erreur réseau : $e');
+      setState(() => error = e.toString().replaceAll('Exception: ', ''));
     }
   }
 
   Future<void> loadFoodProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      setState(() {
-        _foodProfileError = 'Utilisateur non connecté.';
-        _isLoadingFoodProfile = false;
-      });
-      return;
-    }
-
     try {
-      final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/me/food-profile'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      final data = await _userRepository.getFoodProfile();
 
       if (!mounted) return;
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
+      setState(() {
+        _goalType = (data['goalType'] as String?) ?? 'CLASSIQUE';
+        _dietType = (data['dietType'] as String?) ?? 'CLASSIQUE';
+        _isHalal = (data['isHalal'] as bool?) ?? false;
 
-        setState(() {
-          _goalType = (data['goalType'] as String?) ?? 'CLASSIQUE';
-          _dietType = (data['dietType'] as String?) ?? 'CLASSIQUE';
-          _isHalal = (data['isHalal'] as bool?) ?? false;
+        final rawAllergies = (data['allergies'] as List?) ?? [];
+        _allergies = rawAllergies.map((e) => e.toString()).toSet();
 
-          final rawAllergies = (data['allergies'] as List?) ?? [];
-          _allergies = rawAllergies.map((e) => e.toString()).toSet();
+        _otherAllergiesController.text =
+            (data['autreAllergies'] as String?) ?? '';
 
-          _otherAllergiesController.text =
-              (data['autreAllergies'] as String?) ?? '';
-
-          _isLoadingFoodProfile = false;
-          _foodProfileError = null;
-        });
-      } else {
-        setState(() {
-          _foodProfileError =
-              'Erreur chargement profil alimentaire : ${response.statusCode}';
-          _isLoadingFoodProfile = false;
-        });
-      }
+        _isLoadingFoodProfile = false;
+        _foodProfileError = null;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _foodProfileError =
-            'Erreur réseau lors du chargement du profil alimentaire : $e';
+        _foodProfileError = e.toString().replaceAll('Exception: ', '');
         _isLoadingFoodProfile = false;
       });
     }
   }
 
   Future<void> saveFoodProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      setState(() {
-        _foodProfileError = 'Utilisateur non connecté.';
-      });
-      return;
-    }
-
     setState(() {
       _isSavingFoodProfile = true;
       _foodProfileError = null;
     });
 
-    final body = jsonEncode({
-      'goalType': _goalType,
-      'dietType': _dietType,
-      'isHalal': _isHalal,
-      'allergies': _allergies.toList(),
-      'autreAllergies': _otherAllergiesController.text.trim().isEmpty
-          ? null
-          : _otherAllergiesController.text.trim(),
-    });
-
     try {
-      final response = await http.put(
-        Uri.parse('${ApiConfig.baseUrl}/api/me/food-profile'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: body,
+      await _userRepository.updateFoodProfile(
+        goalType: _goalType,
+        dietType: _dietType,
+        isHalal: _isHalal,
+        allergies: _allergies,
+        otherAllergies: _otherAllergiesController.text.trim(),
       );
 
       if (!mounted) return;
 
-      if (response.statusCode == 200) {
-        setState(() {
-          _isSavingFoodProfile = false;
-        });
+      setState(() {
+        _isSavingFoodProfile = false;
+      });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil alimentaire mis à jour avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        setState(() {
-          _isSavingFoodProfile = false;
-          _foodProfileError =
-              'Erreur sauvegarde profil alimentaire : ${response.statusCode}';
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_foodProfileError!),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profil alimentaire mis à jour avec succès'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -525,288 +428,53 @@ class _ProfilePageState extends State<ProfilePage> {
     required String codePostal,
     String? password,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-
-    if (token == null) {
-      setState(() => error = 'Utilisateur non connecté.');
-      return;
-    }
-
     setState(() {
       _isUpdating = true;
       error = null;
     });
 
     try {
-      final body = <String, dynamic>{
-        'prenom': prenom,
-        'nom': nom,
-        'pseudo': pseudo,
-        'email': email,
-        'adresse': adresse,
-        'ville': ville,
-        'codePostal': codePostal,
-      };
-
-      if (password != null && password.isNotEmpty) {
-        body['password'] = password;
-      }
-
-      final response = await http
-          .put(
-            Uri.parse('${ApiConfig.baseUrl}/api/user'),
-            headers: {
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(const Duration(seconds: 10));
+      final updatedUser = await _userRepository.updateProfile(
+        prenom: prenom,
+        nom: nom,
+        pseudo: pseudo,
+        email: email,
+        password: password,
+        adresse: adresse,
+        ville: ville,
+        codePostal: codePostal,
+      );
 
       if (!mounted) return;
 
-      if (response.statusCode == 200) {
-        final updatedUser = jsonDecode(response.body);
-        setState(() {
-          user = updatedUser;
-          _isUpdating = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil mis à jour avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        setState(() {
-          _isUpdating = false;
-          error =
-              'Erreur mise à jour : ${response.statusCode} — ${response.body}';
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error!), backgroundColor: Colors.red),
-        );
-      }
-    } on TimeoutException {
-      if (!mounted) return;
       setState(() {
+        user = updatedUser;
         _isUpdating = false;
-        error = 'Délai dépassé lors de la mise à jour du profil.';
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profil mis à jour avec succès'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _isUpdating = false;
-        error = 'Erreur réseau lors de la mise à jour : $e';
+        error = e.toString().replaceAll('Exception: ', '');
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error!), backgroundColor: Colors.red),
+      );
     }
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwt_token');
+    await AuthService.logout();
 
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-  }
-}
-
-class _FoodProfileEditResult {
-  final String goalType;
-  final String dietType;
-  final bool isHalal;
-  final Set<String> allergies;
-  final String otherAllergies;
-
-  _FoodProfileEditResult({
-    required this.goalType,
-    required this.dietType,
-    required this.isHalal,
-    required this.allergies,
-    required this.otherAllergies,
-  });
-}
-
-class _FoodProfileDialog extends StatefulWidget {
-  final String initialGoalType;
-  final String initialDietType;
-  final bool initialIsHalal;
-  final Set<String> initialAllergies;
-  final String initialOtherAllergies;
-
-  const _FoodProfileDialog({
-    required this.initialGoalType,
-    required this.initialDietType,
-    required this.initialIsHalal,
-    required this.initialAllergies,
-    required this.initialOtherAllergies,
-  });
-
-  @override
-  State<_FoodProfileDialog> createState() => _FoodProfileDialogState();
-}
-
-class _FoodProfileDialogState extends State<_FoodProfileDialog> {
-  late String _goalType;
-  late String _dietType;
-  late bool _isHalal;
-  late Set<String> _allergies;
-  late TextEditingController _otherController;
-
-  @override
-  void initState() {
-    super.initState();
-    _goalType = widget.initialGoalType;
-    _dietType = widget.initialDietType;
-    _isHalal = widget.initialIsHalal;
-    _allergies = {...widget.initialAllergies};
-    _otherController = TextEditingController(
-      text: widget.initialOtherAllergies,
-    );
-  }
-
-  @override
-  void dispose() {
-    _otherController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Modifier le profil alimentaire'),
-      content: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Objectif
-              DropdownButtonFormField<String>(
-                value: _goalType,
-                decoration: const InputDecoration(
-                  labelText: 'Objectif',
-                  border: OutlineInputBorder(),
-                ),
-                items: kGoalTypeLabels.entries
-                    .map(
-                      (e) => DropdownMenuItem<String>(
-                        value: e.key,
-                        child: Text(e.value),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() => _goalType = value);
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Régime
-              DropdownButtonFormField<String>(
-                value: _dietType,
-                decoration: const InputDecoration(
-                  labelText: 'Régime',
-                  border: OutlineInputBorder(),
-                ),
-                items: kDietTypeLabels.entries
-                    .map(
-                      (e) => DropdownMenuItem<String>(
-                        value: e.key,
-                        child: Text(e.value),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() => _dietType = value);
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Halal
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Je souhaite manger halal'),
-                value: _isHalal,
-                onChanged: (value) {
-                  setState(() => _isHalal = value);
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Allergies
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Allergies',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Column(
-                children: kAllergyLabels.entries.map((entry) {
-                  final code = entry.key;
-                  final label = entry.value;
-                  final selected = _allergies.contains(code);
-
-                  return CheckboxListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(label),
-                    value: selected,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value == true) {
-                          _allergies.add(code);
-                        } else {
-                          _allergies.remove(code);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-
-              // Autres allergies
-              TextField(
-                controller: _otherController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Autres allergies (optionnel)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () =>
-              Navigator.of(context).pop<_FoodProfileEditResult?>(null),
-          child: const Text('Annuler'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop<_FoodProfileEditResult>(
-              _FoodProfileEditResult(
-                goalType: _goalType,
-                dietType: _dietType,
-                isHalal: _isHalal,
-                allergies: _allergies,
-                otherAllergies: _otherController.text.trim(),
-              ),
-            );
-          },
-          child: const Text('Enregistrer'),
-        ),
-      ],
-    );
   }
 }

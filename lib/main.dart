@@ -8,7 +8,7 @@ import 'package:malinrecetteflutter/pages/home_page/home_page.dart';
 import 'package:malinrecetteflutter/pages/login/login_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_page.dart';
 import 'package:malinrecetteflutter/pages/register/register_page.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/constants/app_colors.dart';
 
 void main() {
   runApp(const MyApp());

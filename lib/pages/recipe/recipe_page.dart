@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/models/paginated_recipes.dart';
+import 'package:malinrecetteflutter/models/recipe.dart';
+import 'package:malinrecetteflutter/models/recipe_illustration.dart';
+import 'package:malinrecetteflutter/models/recipe_tag.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_detail_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/add_recipe_page.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
@@ -8,8 +12,6 @@ import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/date_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../models/recipe.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});

@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
+import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
@@ -25,46 +25,38 @@ class _RegisterPageState extends State<RegisterPage> {
   final codePostalController = TextEditingController();
 
   String? message;
+  late final AuthRepository _authRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _authRepository = AuthRepository(apiService: apiService);
+  }
 
   Future<void> register() async {
-    final client = http.Client();
     try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/register');
-
-      final response = await client.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
-          'pseudo': pseudoController.text,
-          'prenom': prenomController.text,
-          'nom': nomController.text,
-          'adresse': adresseController.text,
-          'ville': villeController.text,
-          'codePostal': codePostalController.text,
-        }),
+      await _authRepository.register(
+        email: emailController.text,
+        password: passwordController.text,
+        pseudo: pseudoController.text,
+        prenom: prenomController.text,
+        nom: nomController.text,
+        adresse: adresseController.text,
+        ville: villeController.text,
+        codePostal: codePostalController.text,
       );
 
-      if (response.statusCode == 201) {
-        setState(() {
-          message = "Inscription réussie !";
-        });
-        Navigator.of(context).pushReplacementNamed('/home_page');
-      } else {
-        setState(() {
-          message = "Erreur : ${response.statusCode} - ${response.body}";
-        });
-      }
-    } catch (e) {
+      if (!mounted) return;
       setState(() {
-        message = "Erreur réseau : $e";
+        message = "Inscription réussie !";
       });
-    } finally {
-      client.close();
+      Navigator.of(context).pushReplacementNamed('/home_page');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        message = e.toString().replaceAll('Exception: ', '');
+      });
     }
   }
 

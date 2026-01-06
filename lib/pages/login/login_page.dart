@@ -1,11 +1,10 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/config/api_config.dart';
-import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
-import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,60 +17,30 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String? message;
+  late final AuthRepository _authRepository;
+
+  @override
+  void initState() {
+    super.initState();
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    _authRepository = AuthRepository(apiService: apiService);
+  }
 
   Future<void> login() async {
-    final client = http.Client();
     try {
-      final response = await client.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': emailController.text.trim(),
-          'password': passwordController.text,
-        }),
+      await _authRepository.login(
+        email: emailController.text,
+        password: passwordController.text,
       );
 
       if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await AuthService.saveToken(data['token']);
-        await AuthService.saveUserData(data['user']);
-
-        Navigator.of(context).pushReplacementNamed('/home_page');
-      } else {
-        setState(() {
-          message = _errorFromResponse(response);
-        });
-      }
-    } catch (_) {
+      Navigator.of(context).pushReplacementNamed('/home_page');
+    } catch (e) {
       if (!mounted) return;
       setState(() {
-        message = "Erreur réseau. Réessaie dans quelques instants.";
+        message = e.toString().replaceAll('Exception: ', '');
       });
-    } finally {
-      client.close();
     }
-  }
-
-  String _errorFromResponse(http.Response response) {
-    // Si l'API renvoie un JSON avec "message", on le récupère
-    try {
-      final body = jsonDecode(response.body);
-      if (body is Map && body['message'] is String) {
-        return body['message'] as String;
-      }
-    } catch (_) {
-      // corps non-JSON (HTML 500) → on ignore
-    }
-
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      return "Email ou mot de passe incorrect.";
-    }
-    if (response.statusCode >= 500) {
-      return "Le serveur rencontre un problème. Réessaie plus tard.";
-    }
-    return "Connexion impossible (code ${response.statusCode}).";
   }
 
   @override

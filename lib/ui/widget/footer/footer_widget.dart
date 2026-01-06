@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/ui/constants/app_colors.dart';
+import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/Navlink_widget.dart';
 
 class FooterWidget extends StatelessWidget {
