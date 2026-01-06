@@ -1,0 +1,98 @@
+import 'package:flutter/material.dart';
+
+class FoodProfileSummaryCard extends StatelessWidget {
+  final bool isLoading;
+  final String? error;
+  final String goalTypeLabel;
+  final String dietTypeLabel;
+  final bool isHalal;
+  final String allergiesLabel;
+  final bool isSaving;
+  final VoidCallback onEdit;
+
+  const FoodProfileSummaryCard({
+    super.key,
+    required this.isLoading,
+    this.error,
+    required this.goalTypeLabel,
+    required this.dietTypeLabel,
+    required this.isHalal,
+    required this.allergiesLabel,
+    required this.isSaving,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Profil alimentaire',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  if (error != null) ...[
+                    Text(
+                      error!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  _buildSummaryRow('Objectif', goalTypeLabel),
+                  const SizedBox(height: 8),
+                  _buildSummaryRow('Régime', dietTypeLabel),
+                  const SizedBox(height: 8),
+                  _buildSummaryRow('Halal', isHalal ? 'Oui' : 'Non'),
+                  const SizedBox(height: 8),
+                  _buildSummaryRow('Allergies', allergiesLabel),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton.icon(
+                      onPressed: isSaving ? null : onEdit,
+                      icon: isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.restaurant_menu, size: 18),
+                      label: Text(
+                        isSaving ? 'Enregistrement...' : 'Modifier le profil alimentaire',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(value, style: const TextStyle(color: Colors.black87)),
+        ),
+      ],
+    );
+  }
+}
+

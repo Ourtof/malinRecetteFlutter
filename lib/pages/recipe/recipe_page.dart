@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
-import 'package:malinrecetteflutter/models/recipe_illustration.dart';
-import 'package:malinrecetteflutter/models/recipe_tag.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_detail_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/add_recipe_page.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_grid.dart';
+import 'package:malinrecetteflutter/ui/widget/recipe/recipe_pagination.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
-import 'package:malinrecetteflutter/utils/date_formatter.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
@@ -255,200 +253,31 @@ class _RecipePageState extends State<RecipePage> {
 
         return Column(
           children: [
-            Expanded(child: _buildRecipesGrid(data.items)),
-            _buildPagination(data),
+            Expanded(
+              child: RecipeGrid(
+                recipes: data.items,
+                selectedTag: _selectedTag,
+                onTagTap: _toggleTag,
+                onRecipeTap: (recipe) async {
+                  final deleted = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RecipeDetailPage(recipe: recipe),
+                    ),
+                  );
+                  if (deleted == true) _loadRecipes(page: _currentPage);
+                },
+              ),
+            ),
+            RecipePagination(
+              data: data,
+              currentPage: _currentPage,
+              onPageChange: (page) => _loadRecipes(page: page),
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildRecipesGrid(List<Recipe> recipes) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = 1;
-        if (constraints.maxWidth >= 1000) {
-          crossAxisCount = 3;
-        } else if (constraints.maxWidth >= 650) {
-          crossAxisCount = 2;
-        }
-
-        return GridView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 4 / 3,
-          ),
-          itemCount: recipes.length,
-          itemBuilder: (context, index) => _buildRecipeCard(recipes[index]),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecipeCard(Recipe recipe) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        final deleted = await Navigator.push<bool>(
-          context,
-          MaterialPageRoute(builder: (_) => RecipeDetailPage(recipe: recipe)),
-        );
-        if (deleted == true) _loadRecipes(page: _currentPage);
-      },
-      child: Card(
-        elevation: 1.5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildRecipeHeader(recipe),
-              const SizedBox(height: 8),
-              if (recipe.illustration?.nomFichier.isNotEmpty ?? false)
-                _buildRecipeImage(recipe.illustration!),
-              const SizedBox(height: 8),
-              if (recipe.auteur != null) _buildRecipeAuthor(recipe),
-              const SizedBox(height: 4),
-              if (recipe.tags.isNotEmpty) _buildRecipeTags(recipe.tags),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecipeHeader(Recipe recipe) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(Icons.fastfood, size: 20),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            recipe.titre,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecipeImage(RecipeIllustration illustration) {
-    return Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          '${ApiConfig.baseUrl}/api/illustrations/${illustration.nomFichier}',
-          width: double.infinity,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecipeAuthor(Recipe recipe) {
-    return Text(
-      'par ${recipe.auteur!.pseudo}'
-      '${recipe.dateRecette != null ? " • ${DateFormatter.formatDate(recipe.dateRecette)}" : ""}',
-      style: Theme.of(context).textTheme.bodySmall,
-    );
-  }
-
-  Widget _buildRecipeTags(List<RecipeTag> tags) {
-    // Limite le nombre de tags affichés pour éviter que la carte devienne trop haute
-    const maxVisibleTags = 3;
-    final visibleTags = tags.take(maxVisibleTags).toList();
-    final remainingCount = tags.length - maxVisibleTags;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
-        children: [
-          ...visibleTags.map((tag) {
-            final isSelected = tag.contenu == _selectedTag;
-            return ActionChip(
-              label: Text(
-                tag.contenu,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              onPressed: () => _toggleTag(tag.contenu),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            );
-          }),
-          if (remainingCount > 0)
-            Chip(
-              label: Text(
-                '+$remainingCount',
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPagination(PaginatedRecipes data) {
-    final totalPages = (data.total / data.limit).ceil();
-    if (totalPages <= 1) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            onPressed: _currentPage > 1 ? () => _loadRecipes(page: 1) : null,
-            icon: const Icon(Icons.first_page),
-            tooltip: 'Première page',
-          ),
-          IconButton(
-            onPressed: _currentPage > 1 ? () => _loadRecipes(page: _currentPage - 1) : null,
-            icon: const Icon(Icons.chevron_left),
-            tooltip: 'Page précédente',
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Page $_currentPage sur $totalPages',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(width: 16),
-          IconButton(
-            onPressed: _currentPage < totalPages ? () => _loadRecipes(page: _currentPage + 1) : null,
-            icon: const Icon(Icons.chevron_right),
-            tooltip: 'Page suivante',
-          ),
-          IconButton(
-            onPressed: _currentPage < totalPages ? () => _loadRecipes(page: totalPages) : null,
-            icon: const Icon(Icons.last_page),
-            tooltip: 'Dernière page',
-          ),
-        ],
-      ),
-    );
-  }
 }

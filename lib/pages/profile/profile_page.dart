@@ -12,6 +12,7 @@ import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widg
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/ui/widget/profile_information.dart';
+import 'package:malinrecetteflutter/ui/widget/profile/food_profile_summary_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -107,7 +108,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           const SizedBox(height: 16),
                           _buildEditButton(),
                           const SizedBox(height: 24),
-                          _buildFoodProfileSummaryCard(),
+                          FoodProfileSummaryCard(
+                            isLoading: _isLoadingFoodProfile,
+                            error: _foodProfileError,
+                            goalTypeLabel: _goalTypeLabel(),
+                            dietTypeLabel: _dietTypeLabel(),
+                            isHalal: _isHalal,
+                            allergiesLabel: _allergiesLabel(),
+                            isSaving: _isSavingFoodProfile,
+                            onEdit: _openFoodProfileDialog,
+                          ),
                           const SizedBox(height: 32),
                           PrimaryActionButtonWidget(
                             label: 'Se déconnecter',
@@ -215,85 +225,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// --- Nouvelle carte : résumé du profil alimentaire + bouton popup ---
-  Widget _buildFoodProfileSummaryCard() {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-        child: _isLoadingFoodProfile
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Profil alimentaire',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-
-                  if (_foodProfileError != null) ...[
-                    Text(
-                      _foodProfileError!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  _buildSummaryRow('Objectif', _goalTypeLabel()),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow('Régime', _dietTypeLabel()),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow('Halal', _isHalal ? 'Oui' : 'Non'),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow('Allergies', _allergiesLabel()),
-                  const SizedBox(height: 16),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton.icon(
-                      onPressed: (_isLoadingFoodProfile || _isSavingFoodProfile)
-                          ? null
-                          : _openFoodProfileDialog,
-                      icon: _isSavingFoodProfile
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.restaurant_menu, size: 18),
-                      label: Text(
-                        _isSavingFoodProfile
-                            ? 'Enregistrement...'
-                            : 'Modifier le profil alimentaire',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 90,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.black87)),
-        ),
-      ],
-    );
-  }
 
   Future<void> _openFoodProfileDialog() async {
     final result = await showDialog<FoodProfileEditResult>(
