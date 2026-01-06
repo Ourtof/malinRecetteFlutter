@@ -1,22 +1,31 @@
 import 'dart:convert';
 import 'package:malinrecetteflutter/api/api_service.dart';
 import 'package:malinrecetteflutter/models/admin_user.dart';
+import 'package:malinrecetteflutter/models/paginated_users.dart';
 
 class AdminRepository {
   final ApiService _apiService;
 
   AdminRepository({required ApiService apiService}) : _apiService = apiService;
 
-  // Récupère la liste des utilisateurs (avec recherche optionnelle)
-  Future<List<AdminUser>> getUsers({String? search}) async {
-    final queryParams = <String, String>{};
+  // Récupère une liste paginée d'utilisateurs
+  Future<PaginatedUsers> getUsers({
+    String? search,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
     }
 
     final response = await _apiService.get(
       '/api/admin/user',
-      queryParameters: queryParams.isEmpty ? null : queryParams,
+      queryParameters: queryParams,
       requiresAuth: true,
     );
 
@@ -27,14 +36,8 @@ class AdminRepository {
       );
     }
 
-    final dynamic data = jsonDecode(response.body);
-    final List<dynamic> rawList = (data is List)
-        ? data
-        : (data['items'] as List<dynamic>);
-
-    return rawList
-        .map((e) => AdminUser.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final jsonBody = jsonDecode(response.body) as Map<String, dynamic>;
+    return PaginatedUsers.fromJson(jsonBody);
   }
 
   // Active ou désactive un utilisateur
