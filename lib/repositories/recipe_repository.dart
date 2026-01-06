@@ -199,5 +199,20 @@ class RecipeRepository {
       'Erreur lors de la recommandation (${response.statusCode}) : ${response.body}',
     );
   }
+
+  // Supprime une recette
+  Future<void> deleteRecipe(int id) async {
+    final response = await _apiService.delete(
+      '/api/recettes/$id',
+      requiresAuth: true,
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception(
+        'Erreur lors de la suppression de la recette '
+        '(${response.statusCode}) : ${response.body}',
+      );
+    }
+  }
 }
 

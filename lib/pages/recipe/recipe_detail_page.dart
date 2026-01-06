@@ -71,33 +71,22 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     });
 
     try {
-      // TODO: Ajouter la méthode deleteRecipe dans RecipeRepository si nécessaire
-      // Pour l'instant, on garde l'appel direct via ApiService
-      final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
-      final response = await apiService.delete(
-        '/api/recettes/${_recipe.id}',
-        requiresAuth: true,
-      );
+      await _recipeRepository.deleteRecipe(_recipe.id);
 
       if (!mounted) return;
-
-      if (response.statusCode == 204) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Recette supprimée.')));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de la suppression (${response.statusCode})'),
-          ),
-        );
-      }
+      Navigator.of(context).pop(true);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Recette supprimée.')));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+      ).showSnackBar(
+        SnackBar(
+          content: Text('Erreur : ${e.toString().replaceAll('Exception: ', '')}'),
+        ),
+      );
     } finally {
       if (!mounted) return;
       setState(() {
