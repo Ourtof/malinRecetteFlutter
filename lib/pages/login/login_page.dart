@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
+import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
@@ -38,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        message = e.toString().replaceAll('Exception: ', '');
+        message = ErrorHelpers.extractErrorMessage(e);
       });
     }
   }

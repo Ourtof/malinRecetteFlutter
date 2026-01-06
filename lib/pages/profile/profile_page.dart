@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/constants/food_profile_constants.dart';
+import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/pages/profile/edit_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart';
@@ -326,7 +327,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final profileData = await _userRepository.getProfile();
       setState(() => user = profileData);
     } catch (e) {
-      setState(() => error = e.toString().replaceAll('Exception: ', ''));
+      setState(() => error = ErrorHelpers.extractErrorMessage(e));
     }
   }
 
@@ -353,7 +354,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _foodProfileError = e.toString().replaceAll('Exception: ', '');
+        _foodProfileError = ErrorHelpers.extractErrorMessage(e);
         _isLoadingFoodProfile = false;
       });
     }
@@ -447,7 +448,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (!mounted) return;
       setState(() {
         _isUpdating = false;
-        error = e.toString().replaceAll('Exception: ', '');
+        error = ErrorHelpers.extractErrorMessage(e);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

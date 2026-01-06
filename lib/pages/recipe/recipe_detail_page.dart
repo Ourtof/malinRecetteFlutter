@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
+import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/date_formatter.dart';
@@ -84,7 +85,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
         context,
       ).showSnackBar(
         SnackBar(
-          content: Text('Erreur : ${e.toString().replaceAll('Exception: ', '')}'),
+          content: Text('Erreur : ${ErrorHelpers.extractErrorMessage(e)}'),
         ),
       );
     } finally {

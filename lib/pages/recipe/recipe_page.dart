@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
-import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
+import 'package:malinrecetteflutter/utils/image_url_builder.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recipe_illustration.dart';
 import 'package:malinrecetteflutter/models/recipe_tag.dart';
@@ -10,8 +10,8 @@ import 'package:malinrecetteflutter/pages/recipe/add_recipe_page.dart';
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/utils/date_formatter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
@@ -48,9 +48,8 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   Future<void> _checkAuth() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
-    setState(() => _isLogged = token != null);
+    final isLogged = await AuthService.isLoggedIn();
+    setState(() => _isLogged = isLogged);
   }
 
   void _loadRecipes({int page = 1}) {
@@ -347,7 +346,7 @@ class _RecipePageState extends State<RecipePage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.network(
-          '${ApiConfig.baseUrl}/api/illustrations/${illustration.nomFichier}',
+          ImageUrlBuilder.buildIllustrationUrl(illustration.nomFichier),
           width: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
