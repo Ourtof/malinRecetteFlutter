@@ -7,6 +7,12 @@ import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/utils/string_helpers.dart';
 import 'package:malinrecetteflutter/utils/color_helpers.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_page_header.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_user_search_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_user_count_bar.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_user_status_chip.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_user_action_button.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_error_widget.dart';
 
 class AdminUserListPage extends StatefulWidget {
   const AdminUserListPage({super.key});
@@ -119,20 +125,10 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Gestion des utilisateurs',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                AdminPageHeader(
+                  title: 'Gestion des utilisateurs',
+                  description: "Vue d'ensemble des comptes et de leur statut.",
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Vue d’ensemble des comptes et de leur statut.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: ColorHelpers.withOpacity(theme.colorScheme.onSurface, 0.7),
-                  ),
-                ),
-                const SizedBox(height: 24),
                 Expanded(
                   child: Card(
                     elevation: 4,
@@ -159,25 +155,9 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _loadUsers(search: ''),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Réessayer'),
-            ),
-          ],
-        ),
+      return AdminErrorWidget(
+        error: _error!,
+        onRetry: () => _loadUsers(search: ''),
       );
     }
 
@@ -193,48 +173,18 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
+        AdminUserSearchBar(
           controller: _searchController,
-          decoration: InputDecoration(
-            labelText: 'Rechercher par pseudo ou email',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchController.clear();
-                      _loadUsers(search: '');
-                    },
-                  )
-                : null,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
+          onClear: () {
+            _searchController.clear();
+            _loadUsers(search: '');
+          },
           onSubmitted: (value) => _loadUsers(search: value.trim()),
         ),
         const SizedBox(height: 12),
-
-        // compteur + bouton refresh
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${_users.length} utilisateur(s)',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Color.fromRGBO(
-                  (theme.colorScheme.onSurface.r * 255.0).round().clamp(0, 255),
-                  (theme.colorScheme.onSurface.g * 255.0).round().clamp(0, 255),
-                  (theme.colorScheme.onSurface.b * 255.0).round().clamp(0, 255),
-                  0.7,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () => _loadUsers(search: _search),
-              tooltip: 'Rafraîchir',
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
+        AdminUserCountBar(
+          count: _users.length,
+          onRefresh: () => _loadUsers(search: _search),
         ),
         const SizedBox(height: 8),
 
@@ -292,8 +242,12 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
                         DataCell(Text(user.pseudo)),
                         DataCell(Text(user.email)),
                         DataCell(Text(user.roles.join(', '))),
-                        DataCell(_buildStatusChip(user.enabled, theme)),
-                        DataCell(_buildActionButton(user, isUpdating, theme)),
+                        DataCell(AdminUserStatusChip(enabled: user.enabled)),
+                        DataCell(AdminUserActionButton(
+                          user: user,
+                          isUpdating: isUpdating,
+                          onToggle: () => _toggleUser(user),
+                        )),
                       ],
                     );
                   }).toList(),
@@ -306,81 +260,4 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     );
   }
 
-  Widget _buildStatusChip(bool enabled, ThemeData theme) {
-    final color = enabled ? theme.colorScheme.primary : theme.colorScheme.error;
-    final bgColor = ColorHelpers.withOpacity(color, 0.12);
-    final label = enabled ? 'Actif' : 'Inactif';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(AdminUser user, bool isUpdating, ThemeData theme) {
-    if (isUpdating) {
-      return const SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-
-    final isActive = user.enabled;
-
-    Future<void> handleTap() async {
-      // Confirmation uniquement pour la désactivation
-      if (isActive) {
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: const Text('Désactiver le compte ?'),
-              content: Text(
-                'Tu es sûr de vouloir désactiver le compte "${user.pseudo}" ? '
-                'Il ne pourra plus se connecter.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(false),
-                  child: const Text('Annuler'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(true),
-                  child: const Text('Désactiver'),
-                ),
-              ],
-            );
-          },
-        );
-
-        if (confirm != true) return;
-      }
-
-      await _toggleUser(user);
-    }
-
-    return TextButton.icon(
-      onPressed: handleTap,
-      icon: Icon(isActive ? Icons.block : Icons.check_circle_outline, size: 18),
-      label: Text(isActive ? 'Désactiver' : 'Réactiver'),
-      style: TextButton.styleFrom(
-        foregroundColor: isActive
-            ? theme.colorScheme.error
-            : theme.colorScheme.primary,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      ),
-    );
-  }
 }
