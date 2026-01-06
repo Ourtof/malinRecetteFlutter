@@ -4,6 +4,9 @@ import 'package:malinrecetteflutter/models/admin_user.dart';
 import 'package:malinrecetteflutter/repositories/admin_repository.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
+import 'package:malinrecetteflutter/utils/string_helpers.dart';
+import 'package:malinrecetteflutter/utils/color_helpers.dart';
 
 class AdminUserListPage extends StatefulWidget {
   const AdminUserListPage({super.key});
@@ -30,10 +33,6 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     _adminRepository = AdminRepository(
       apiService: ApiServiceFactory.create(),
     );
-    _searchController.addListener(() {
-      // croix
-      setState(() {});
-    });
     _loadUsers();
   }
 
@@ -53,7 +52,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
     try {
       final users = await _adminRepository.getUsers(
-        search: effectiveSearch.isNotEmpty ? effectiveSearch : null,
+        search: StringHelpers.nullIfEmpty(effectiveSearch),
       );
 
       if (!mounted) return;
@@ -84,22 +83,24 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
         newStatus,
       );
 
-      if (!mounted) return;
-      setState(() {
-        _users = _users
-            .map((u) => u.id == updatedUser.id ? updatedUser : u)
-            .toList();
-      });
+      if (mounted) {
+        setState(() {
+          final index = _users.indexWhere((u) => u.id == updatedUser.id);
+          if (index != -1) {
+            _users[index] = updatedUser;
+          }
+        });
+      }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e')),
-      );
+      if (mounted) {
+        SnackbarHelpers.showError(context, 'Erreur : $e');
+      }
     } finally {
-      if (!mounted) return;
-      setState(() {
-        _updatingUserIds.remove(user.id);
-      });
+      if (mounted) {
+        setState(() {
+          _updatingUserIds.remove(user.id);
+        });
+      }
     }
   }
 
@@ -128,7 +129,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
                 Text(
                   'Vue d’ensemble des comptes et de leur statut.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: ColorHelpers.withOpacity(theme.colorScheme.onSurface, 0.7),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -192,44 +193,40 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Rechercher par pseudo ou email',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            _loadUsers(search: '');
-                          },
-                        )
-                      : null,
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                ),
-                onSubmitted: (value) {
-                  _loadUsers(search: value.trim());
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
+        TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            labelText: 'Rechercher par pseudo ou email',
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      _loadUsers(search: '');
+                    },
+                  )
+                : null,
+            border: const OutlineInputBorder(),
+            isDense: true,
+          ),
+          onSubmitted: (value) => _loadUsers(search: value.trim()),
         ),
         const SizedBox(height: 12),
 
-        // ---- Ligne compteur + bouton refresh ----
+        // compteur + bouton refresh
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               '${_users.length} utilisateur(s)',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: Color.fromRGBO(
+                  (theme.colorScheme.onSurface.r * 255.0).round().clamp(0, 255),
+                  (theme.colorScheme.onSurface.g * 255.0).round().clamp(0, 255),
+                  (theme.colorScheme.onSurface.b * 255.0).round().clamp(0, 255),
+                  0.7,
+                ),
               ),
             ),
             IconButton(
@@ -241,7 +238,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
         ),
         const SizedBox(height: 8),
 
-        // ---- Tableau ----
+        // Tableau
         Expanded(
           child: Scrollbar(
             thumbVisibility: true,
@@ -254,13 +251,13 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.onSurface,
                   ),
-                  headingRowColor: MaterialStatePropertyAll(
-                    theme.colorScheme.surfaceVariant.withOpacity(0.8),
+                  headingRowColor: WidgetStateProperty.all(
+                    ColorHelpers.withOpacity(theme.colorScheme.surfaceContainerHighest, 0.8),
                   ),
                   dataRowMinHeight: 48,
                   border: TableBorder(
                     horizontalInside: BorderSide(
-                      color: theme.dividerColor.withOpacity(0.3),
+                      color: ColorHelpers.withOpacity(theme.dividerColor, 0.3),
                       width: 0.5,
                     ),
                   ),
@@ -278,14 +275,17 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
                     final isUpdating = _updatingUserIds.contains(user.id);
 
                     return DataRow(
-                      color: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.hovered)) {
-                          return theme.colorScheme.primary.withOpacity(0.04);
+                      color: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.hovered)) {
+                          return ColorHelpers.withOpacity(theme.colorScheme.primary, 0.04);
                         }
-                        // zébrage léger
-                        return index.isEven
-                            ? theme.colorScheme.surfaceVariant.withOpacity(0.25)
-                            : Colors.transparent;
+                        if (index.isEven) {
+                          return ColorHelpers.withOpacity(
+                            theme.colorScheme.surfaceContainerHighest,
+                            0.25,
+                          );
+                        }
+                        return Colors.transparent;
                       }),
                       cells: [
                         DataCell(Text(user.id.toString())),
@@ -308,7 +308,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
   Widget _buildStatusChip(bool enabled, ThemeData theme) {
     final color = enabled ? theme.colorScheme.primary : theme.colorScheme.error;
-    final bgColor = color.withOpacity(0.12);
+    final bgColor = ColorHelpers.withOpacity(color, 0.12);
     final label = enabled ? 'Actif' : 'Inactif';
 
     return Container(
