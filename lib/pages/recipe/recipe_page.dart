@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
+import 'package:malinrecetteflutter/config/api_config.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
-import 'package:malinrecetteflutter/utils/image_url_builder.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recipe_illustration.dart';
 import 'package:malinrecetteflutter/models/recipe_tag.dart';
@@ -346,7 +346,7 @@ class _RecipePageState extends State<RecipePage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.network(
-          ImageUrlBuilder.buildIllustrationUrl(illustration.nomFichier),
+          '${ApiConfig.baseUrl}/api/illustrations/${illustration.nomFichier}',
           width: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const SizedBox.shrink(),
