@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/ui/widget/navlink_widget.dart';
 
-/// Widget pour les liens du footer (réutilisable)
+// widget pour les liens du footer
 class FooterLinks extends StatelessWidget {
   final bool isMobile;
 
@@ -42,7 +42,7 @@ class FooterLinks extends StatelessWidget {
                 _buildLink(context, link),
                 const SizedBox(width: 16),
               ])
-          .take(links.length * 2 - 1) // Enlever le dernier SizedBox
+          .take(links.length * 2 - 1)
           .toList(),
     );
   }

@@ -3,7 +3,6 @@ import 'package:malinrecetteflutter/constants/app_colors.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/navlink_widget.dart';
 
-/// Modèle pour un item de navigation
 class NavigationItem {
   final String label;
   final String route;
@@ -18,7 +17,7 @@ class NavigationItem {
   });
 }
 
-/// Widget pour les items de navigation du header
+// nav du header
 class HeaderNavigationItems extends StatelessWidget {
   final bool isMobile;
   final bool isAdmin;

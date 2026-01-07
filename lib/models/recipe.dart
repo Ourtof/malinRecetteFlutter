@@ -37,14 +37,11 @@ class Recipe {
               json['illustration'] as Map<String, dynamic>,
             )
           : null,
-      // ⬇️ ICI : on ne caste plus en List directement
       tags: _parseTags(json['tags']),
     );
   }
 
-  /// Accepte `tags` au format:
-  /// - liste: [ {...}, {...} ]
-  /// - ou map: { "0": {...}, "1": {...} }
+  // Accepte tags au format list ou map
   static List<RecipeTag> _parseTags(dynamic raw) {
     if (raw == null) return [];
 
