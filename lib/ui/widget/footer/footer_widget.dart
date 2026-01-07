@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/constants/app_colors.dart';
-import 'package:malinrecetteflutter/ui/widget/navlink_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/footer/footer_links.dart';
+import 'package:malinrecetteflutter/utils/responsive_helpers.dart';
 
 class FooterWidget extends StatelessWidget {
   const FooterWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
+    final isMobile = ResponsiveHelpers.isMobile(context);
 
     return Container(
       width: double.infinity,
@@ -18,7 +18,7 @@ class FooterWidget extends StatelessWidget {
         horizontal: isMobile ? 16 : 28,
       ),
       child: isMobile
-          ? // Sur mobile : colonne avec liens en Wrap
+          ?
           Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,38 +26,12 @@ class FooterWidget extends StatelessWidget {
                 Text(
                   "© 2025 Malin'Recette",
                   style: TextStyle(
-                    fontSize: isMobile ? 12 : 14,
+                    fontSize: 12,
                     color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    NavLink(
-                      label: 'Mentions légales',
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/MentionsLegales');
-                      },
-                    ),
-                    NavLink(
-                      label: 'Qui sommes-nous ?',
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/about');
-                      },
-                    ),
-                    NavLink(
-                      label: "Contact",
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/contact');
-                      },
-                    ),
-                  ],
-                ),
+                FooterLinks(isMobile: true),
               ],
             )
           : // Sur desktop/tablette : Row horizontal
@@ -65,40 +39,14 @@ class FooterWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "© 2025 Malin'Recette",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: AppColors.white,
                   ),
                 ),
-                Row(
-                  children: [
-                    NavLink(
-                      label: 'Mentions légales',
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/MentionsLegales');
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    NavLink(
-                      label: 'Qui sommes-nous ?',
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/about');
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    NavLink(
-                      label: "Contact",
-                      textColor: AppColors.white,
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/contact');
-                      },
-                    ),
-                  ],
-                ),
+                FooterLinks(isMobile: false),
               ],
             ),
     );

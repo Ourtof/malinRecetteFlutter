@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malinrecetteflutter/utils/responsive_helpers.dart';
 
 import '../../constants/app_colors.dart';
 
@@ -18,8 +19,7 @@ class NavLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
+    final isMobile = ResponsiveHelpers.isMobile(context);
 
     return InkWell(
       onTap: onTap,
