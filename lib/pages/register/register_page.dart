@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
@@ -8,6 +9,13 @@ import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
 import '../../constants/app_colors.dart';
 
+// Constantes de validation
+final _kEmailRegex = RegExp(
+  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+);
+final _kCodePostalRegex = RegExp(r'^[0-9]+$');
+const _kSuccessMessage = "Inscription réussie !";
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -16,6 +24,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // Contrôleurs de formulaire
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -26,6 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final villeController = TextEditingController();
   final codePostalController = TextEditingController();
 
+  // État
   String? message;
   late final AuthRepository _authRepository;
 
@@ -37,26 +47,44 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    pseudoController.dispose();
+    prenomController.dispose();
+    nomController.dispose();
+    adresseController.dispose();
+    villeController.dispose();
+    codePostalController.dispose();
+    super.dispose();
+  }
+
   Future<void> register() async {
+    if (!_formKey.currentState!.validate()) return;
+
     try {
       await _authRepository.register(
-        email: emailController.text,
+        email: emailController.text.trim(),
         password: passwordController.text,
-        pseudo: pseudoController.text,
-        prenom: prenomController.text,
-        nom: nomController.text,
-        adresse: adresseController.text,
-        ville: villeController.text,
-        codePostal: codePostalController.text,
+        pseudo: pseudoController.text.trim(),
+        prenom: prenomController.text.trim(),
+        nom: nomController.text.trim(),
+        adresse: adresseController.text.trim(),
+        ville: villeController.text.trim(),
+        codePostal: codePostalController.text.trim(),
       );
 
       if (!mounted) return;
+      
       setState(() {
-        message = "Inscription réussie !";
+        message = _kSuccessMessage;
       });
+      
       Navigator.of(context).pushReplacementNamed('/home_page');
     } catch (e) {
       if (!mounted) return;
+      
       setState(() {
         message = ErrorHelpers.extractErrorMessage(e);
       });
@@ -106,6 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         emailController,
                         'Email',
                         keyboard: TextInputType.emailAddress,
+                        validator: _validateEmail,
                       ),
                       _input(passwordController, 'Mot de passe', obscure: true),
                       _input(pseudoController, 'Pseudo'),
@@ -117,6 +146,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         codePostalController,
                         'Code postal',
                         keyboard: TextInputType.number,
+                        validator: _validateCodePostal,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
 
                       const SizedBox(height: 16),
@@ -134,11 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       // Bouton principal "S'inscrire"
                       PrimaryActionButtonWidget(
                         label: "S'inscrire",
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            register();
-                          }
-                        },
+                        onPressed: register,
                       ),
 
                       // Message éventuel
@@ -165,11 +192,37 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
+String? _validateEmail(String? value) {
+  if (value == null || value.isEmpty) {
+    return "L'email est requis";
+  }
+  
+  if (!_kEmailRegex.hasMatch(value.trim())) {
+    return "Veuillez entrer une adresse email valide";
+  }
+  
+  return null;
+}
+
+String? _validateCodePostal(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Le code postal est requis";
+  }
+  
+  if (!_kCodePostalRegex.hasMatch(value.trim())) {
+    return "Le code postal doit contenir uniquement des chiffres";
+  }
+  
+  return null;
+}
+
 Widget _input(
   TextEditingController c,
   String label, {
   bool obscure = false,
   TextInputType keyboard = TextInputType.text,
+  String? Function(String?)? validator,
+  List<TextInputFormatter>? inputFormatters,
 }) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 12),
@@ -177,12 +230,13 @@ Widget _input(
       controller: c,
       obscureText: obscure,
       keyboardType: keyboard,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      validator: (value) =>
-          (value == null || value.isEmpty) ? "Champ requis" : null,
+      validator: validator ?? 
+          ((value) => (value == null || value.isEmpty) ? "Champ requis" : null),
     ),
   );
 }
