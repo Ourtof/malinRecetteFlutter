@@ -39,7 +39,21 @@ compte admin : admin@gmail.com / admin
 - j'ai fait des fixtures pour les tags
 - responsive : drawer et menu burger n'ont pas fonctionnés car il y a une interférence avec flutter web
 
+ANECDOTE SECU :
 
-raf :
+Note sécurité : En production, remplacer allow_origin par une variable d'environnement dans le nelmio_cors
+
+rate_limiter : grosse sécurité, discussion chatgt pour plus d'info
+d'ailleurs, package installé pour ça.
+
+
+RAF :
 - gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
 - quand on change le mail d'un user, ce dernier n'est plus récupéré et ça crash quand on essaye de changer le profil alimentaire
+
+
+1er audit sécurité : 
+Score de sécurité global : 6.5/10
+Points forts : protection SQL injection, hashage des mots de passe, JWT, protection path traversal.
+Points faibles : CORS trop ouvert, pas de rate limiting, validation insuffisante, exposition de données.
+Souhaitez-vous que je priorise et détaille les corrections à apporter ?
