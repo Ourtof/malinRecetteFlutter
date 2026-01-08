@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
+import 'package:flutter/services.dart';
+import 'package:malinrecetteflutter/utils/form_validators.dart';
 
 class EditProfileResult {
   final String prenom;
@@ -34,6 +35,7 @@ Future<EditProfileResult?> showEditProfileDialog(
   required String initialVille,
   required String initialCodePostal,
 }) {
+  final formKey = GlobalKey<FormState>();
   final prenomController = TextEditingController(text: initialPrenom);
   final nomController = TextEditingController(text: initialNom);
   final pseudoController = TextEditingController(text: initialPseudo);
@@ -49,62 +51,70 @@ Future<EditProfileResult?> showEditProfileDialog(
       return AlertDialog(
         title: const Text('Modifier le profil'),
         content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: prenomController,
-                decoration: const InputDecoration(labelText: 'Prénom'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nomController,
-                decoration: const InputDecoration(labelText: 'Nom'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: pseudoController,
-                decoration: const InputDecoration(labelText: 'Pseudo'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(labelText: 'Mot de passe'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: adresseController,
-                decoration: const InputDecoration(labelText: 'Adresse'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: villeController,
-                decoration: const InputDecoration(labelText: 'Ville'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: codePostalController,
-                decoration: const InputDecoration(labelText: 'Code postal'),
-              ),
-            ],
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: prenomController,
+                  decoration: const InputDecoration(labelText: 'Prénom'),
+                  validator: (value) =>
+                      value?.trim().isEmpty ?? true ? 'Le prénom est requis' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: nomController,
+                  decoration: const InputDecoration(labelText: 'Nom'),
+                  validator: (value) =>
+                      value?.trim().isEmpty ?? true ? 'Le nom est requis' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: pseudoController,
+                  decoration: const InputDecoration(labelText: 'Pseudo'),
+                  validator: (value) =>
+                      value?.trim().isEmpty ?? true ? 'Le pseudo est requis' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: validateEmail,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(labelText: 'Mot de passe'),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: adresseController,
+                  decoration: const InputDecoration(labelText: 'Adresse'),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: villeController,
+                  decoration: const InputDecoration(labelText: 'Ville'),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: codePostalController,
+                  decoration: const InputDecoration(labelText: 'Code postal'),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  validator: validateCodePostal,
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () {
-              if (prenomController.text.trim().isEmpty ||
-                  nomController.text.trim().isEmpty ||
-                  pseudoController.text.trim().isEmpty ||
-                  emailController.text.trim().isEmpty) {
-                SnackbarHelpers.showError(
-                  context,
-                  'Veuillez remplir tous les champs obligatoires',
-                );
+              if (!formKey.currentState!.validate()) {
                 return;
               }
 

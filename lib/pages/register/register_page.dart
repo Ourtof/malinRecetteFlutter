@@ -3,17 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
+import 'package:malinrecetteflutter/utils/form_validators.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 
 import '../../constants/app_colors.dart';
 
-// Constantes de validation
-final _kEmailRegex = RegExp(
-  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-);
-final _kCodePostalRegex = RegExp(r'^[0-9]+$');
 const _kSuccessMessage = "Inscription réussie !";
 
 class RegisterPage extends StatefulWidget {
@@ -134,7 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         emailController,
                         'Email',
                         keyboard: TextInputType.emailAddress,
-                        validator: _validateEmail,
+                        validator: validateEmail,
                       ),
                       _input(passwordController, 'Mot de passe', obscure: true),
                       _input(pseudoController, 'Pseudo'),
@@ -146,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         codePostalController,
                         'Code postal',
                         keyboard: TextInputType.number,
-                        validator: _validateCodePostal,
+                        validator: validateCodePostal,
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
 
@@ -190,30 +186,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-}
-
-String? _validateEmail(String? value) {
-  if (value == null || value.isEmpty) {
-    return "L'email est requis";
-  }
-  
-  if (!_kEmailRegex.hasMatch(value.trim())) {
-    return "Veuillez entrer une adresse email valide";
-  }
-  
-  return null;
-}
-
-String? _validateCodePostal(String? value) {
-  if (value == null || value.isEmpty) {
-    return "Le code postal est requis";
-  }
-  
-  if (!_kCodePostalRegex.hasMatch(value.trim())) {
-    return "Le code postal doit contenir uniquement des chiffres";
-  }
-  
-  return null;
 }
 
 Widget _input(

@@ -38,3 +38,7 @@ compte admin : admin@gmail.com / admin
 - Pour les type de personne, j'ai du faire un fichier Json car le front et le back sont deux technos séparées donc j'ai du me compliquer le projet là dessus aussi pour qu'ils communiquent.
 - j'ai fait des fixtures pour les tags
 - responsive : drawer et menu burger n'ont pas fonctionnés car il y a une interférence avec flutter web
+
+
+raf :
+- gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
