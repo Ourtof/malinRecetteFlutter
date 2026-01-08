@@ -43,8 +43,9 @@ ANECDOTE SECU :
 
 Note sécurité : En production, remplacer allow_origin par une variable d'environnement dans le nelmio_cors
 
-rate_limiter : grosse sécurité, discussion chatgt pour plus d'info
+- rate_limiter : grosse sécurité, discussion chatgt pour plus d'info
 d'ailleurs, package installé pour ça.
+- dans UserController, j'ai sécurisé des données sensible comme adresse, role, code postal au cas ou, pour utilisateur et  admin.
 
 
 RAF :
