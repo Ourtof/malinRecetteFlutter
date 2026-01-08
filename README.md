@@ -42,3 +42,4 @@ compte admin : admin@gmail.com / admin
 
 raf :
 - gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
+- quand on change le mail d'un user, ce dernier n'est plus récupéré et ça crash quand on essaye de changer le profil alimentaire
