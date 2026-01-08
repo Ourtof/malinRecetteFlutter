@@ -47,6 +47,9 @@ Note sécurité : En production, remplacer allow_origin par une variable d'envir
 d'ailleurs, package installé pour ça.
 - dans UserController, j'ai sécurisé des données sensible comme adresse, role, code postal au cas ou, pour utilisateur et  admin.
 
+- j'ai mis une durée de vie limitée au token pour sécuriser le vol du token (il devient inutile), impact limité si compte compromis et c'est une bonne pratiques tout simplement. 
+cf fichier lexik_jwt_authentification.yaml.
+
 
 RAF :
 - gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
