@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String? message;
+  bool isLoading = false;
   late final AuthRepository _authRepository;
 
   @override
@@ -30,6 +31,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login() async {
+    if (isLoading) return;
+    
+    setState(() {
+      isLoading = true;
+      message = null; // effacer les erreurs précédentes
+    });
+
     try {
       await _authRepository.login(
         email: emailController.text,
@@ -42,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       setState(() {
         message = ErrorHelpers.extractErrorMessage(e);
+        isLoading = false;
       });
     }
   }
@@ -105,7 +114,8 @@ class _LoginPageState extends State<LoginPage> {
                     // Bouton de connexion
                     PrimaryActionButtonWidget(
                       label: "Se connecter",
-                      onPressed: login,
+                      onPressed: isLoading ? null : login,
+                      isLoading: isLoading,
                     ),
                     const SizedBox(height: 12),
 
