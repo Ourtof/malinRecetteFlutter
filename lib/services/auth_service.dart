@@ -4,10 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const _tokenKey = 'jwt_token';
+  static const _refreshTokenKey = 'refresh_token';
   static const _userKey = 'user_data';
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  static Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
   }
 
   // vérifie si l'utilisateur est connecté
@@ -20,6 +26,7 @@ class AuthService {
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
+    await prefs.remove(_refreshTokenKey);
     await prefs.remove(_userKey);
   }
 
@@ -29,12 +36,18 @@ class AuthService {
     await prefs.setString(_tokenKey, token);
   }
 
+  // stocke un refresh token
+  static Future<void> saveRefreshToken(String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_refreshTokenKey, refreshToken);
+  }
+
   static Future<void> saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userKey, jsonEncode(userData));
   }
 
-  // Vérifie si l'utilisateur a le rôle d'admin
+  // vérifie si l'utilisateur est admin
   static Future<bool> isAdmin() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_userKey);

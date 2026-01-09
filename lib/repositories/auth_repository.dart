@@ -27,6 +27,9 @@ class AuthRepository {
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     await AuthService.saveToken(data['token'] as String);
+    if (data['refreshToken'] != null) {
+      await AuthService.saveRefreshToken(data['refreshToken'] as String);
+    }
     await AuthService.saveUserData(data['user'] as Map<String, dynamic>);
   }
 
@@ -62,7 +65,37 @@ class AuthRepository {
     // connexion auto après inscription
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     await AuthService.saveToken(data['token'] as String);
+    if (data['refreshToken'] != null) {
+      await AuthService.saveRefreshToken(data['refreshToken'] as String);
+    }
     await AuthService.saveUserData(data['user'] as Map<String, dynamic>);
+  }
+
+  // refresh token
+  Future<void> refreshToken() async {
+    final refreshToken = await AuthService.getRefreshToken();
+    if (refreshToken == null) {
+      throw Exception('Aucun refresh token disponible');
+    }
+
+    final response = await _apiService.postJson(
+      '/api/refresh',
+      body: {
+        'refreshToken': refreshToken,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      // si refresh token est invalide, on déconnecte l'utilisateur
+      await AuthService.logout();
+      throw _parseError(response);
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    await AuthService.saveToken(data['token'] as String);
+    if (data['refreshToken'] != null) {
+      await AuthService.saveRefreshToken(data['refreshToken'] as String);
+    }
   }
 
   // parse les erreurs de réponse
