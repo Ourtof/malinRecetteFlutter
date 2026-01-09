@@ -50,6 +50,8 @@ d'ailleurs, package installé pour ça.
 - j'ai mis une durée de vie limitée au token pour sécuriser le vol du token (il devient inutile), impact limité si compte compromis et c'est une bonne pratiques tout simplement. 
 cf fichier lexik_jwt_authentification.yaml.
 
+- pour plus de sécurité, j'aurais pu me lancer dans les logs pour tracer.
+
 
 RAF :
 - gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
