@@ -79,7 +79,7 @@ class _FoodProfileDialogState extends State<FoodProfileDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Régime
+              // régime
               DropdownButtonFormField<String>(
                 value: _dietType,
                 decoration: const InputDecoration(
@@ -101,7 +101,7 @@ class _FoodProfileDialogState extends State<FoodProfileDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Halal
+              // halal
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Je souhaite manger halal'),
@@ -143,17 +143,6 @@ class _FoodProfileDialogState extends State<FoodProfileDialog> {
                     },
                   );
                 }).toList(),
-              ),
-              const SizedBox(height: 12),
-
-              // Autres allergies
-              TextField(
-                controller: _otherController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Autres allergies (optionnel)',
-                  border: OutlineInputBorder(),
-                ),
               ),
             ],
           ),
