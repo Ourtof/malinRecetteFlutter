@@ -6,10 +6,9 @@ import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/utils/form_validators.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
+import 'package:malinrecetteflutter/ui/widget/error/error_message_card.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
-
-import '../../constants/app_colors.dart';
 
 const _kSuccessMessage = "Inscription réussie !";
 
@@ -177,14 +176,7 @@ class _RegisterPageState extends State<RegisterPage> with LoadingMixin {
                       // error
                       if (errorMessage != null && errorMessage!.isNotEmpty) ...[
                         const SizedBox(height: 16),
-                        Text(
-                          errorMessage!,
-                          style: const TextStyle(
-                            color: AppColors.error,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        ErrorMessageCard(message: errorMessage!),
                       ],
                     ],
                   ),

@@ -56,18 +56,46 @@ class AuthRepository {
     );
 
     if (response.statusCode != 201) {
-      throw Exception(
-        'Erreur lors de l\'inscription (${response.statusCode}) : ${response.body}',
-      );
+      throw _parseError(response);
     }
   }
 
   // Parse les erreurs de réponse
   String _parseError(response) {
+    // Gestion spécifique du rate limiting (429)
+    if (response.statusCode == 429) {
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map) {
+          if (body['error'] is String) {
+            return body['error'] as String;
+          }
+          if (body['message'] is String) {
+            return body['message'] as String;
+          }
+        }
+      } catch (_) {
+        // Si le parsing échoue, on retourne un message par défaut
+      }
+      return 'Trop de tentatives. Réessaie plus tard.';
+    }
+
     try {
       final body = jsonDecode(response.body);
-      if (body is Map && body['message'] is String) {
-        return body['message'] as String;
+      if (body is Map) {
+        // gestion des erreurs de mot de passe avec détails
+        if (body['error'] == 'Mot de passe invalide' && body['details'] is List) {
+          final details = (body['details'] as List).cast<String>();
+          return 'Mot de passe invalide :\n${details.map((d) => '• $d').join('\n')}';
+        }
+        
+        // message simple - on vérifie 'error' AVANT 'message' car 'error' est plus spécifique
+        if (body['error'] is String) {
+          return body['error'] as String;
+        }
+        if (body['message'] is String) {
+          return body['message'] as String;
+        }
       }
     } catch (_) {
       // corps non-JSON (HTML 500) → on ignore
@@ -79,7 +107,7 @@ class AuthRepository {
     if (response.statusCode >= 500) {
       return "Le serveur rencontre un problème. Réessaie plus tard.";
     }
-    return "Connexion impossible (code ${response.statusCode}).";
+    return "Erreur lors de l'inscription (code ${response.statusCode}).";
   }
 }
 

@@ -7,15 +7,14 @@ import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart'
 import 'package:malinrecetteflutter/repositories/user_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
-import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
+import 'package:malinrecetteflutter/ui/widget/error/error_message_card.dart';
 import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
+import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/food_profile_summary_card.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_name_email.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_card.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_edit_button.dart';
-
-import '../../constants/app_colors.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -91,7 +90,10 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(24.0),
         child: error != null
             ? Center(
-                child: Text(error!, style: const TextStyle(color: AppColors.error)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ErrorMessageCard(message: error!),
+                ),
               )
             : user == null
             ? const Center(child: CircularProgressIndicator())

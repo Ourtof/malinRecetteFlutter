@@ -14,12 +14,37 @@ class SnackbarHelpers {
     );
   }
 
-  // SnackBar d'erreur (rouge)
+  // error snackbar
   static void showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: message.contains('\n')
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.split('\n').first,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  ...message
+                      .split('\n')
+                      .skip(1)
+                      .map((line) => Padding(
+                            padding: const EdgeInsets.only(left: 8, bottom: 4),
+                            child: Text(
+                              line,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          )),
+                ],
+              )
+            : Text(message),
         backgroundColor: AppColors.error,
+        duration: message.contains('\n') 
+            ? const Duration(seconds: 6) 
+            : const Duration(seconds: 4),
       ),
     );
   }
