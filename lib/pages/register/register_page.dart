@@ -33,6 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // État
   String? message;
+  bool isLoading = false;
   late final AuthRepository _authRepository;
 
   @override
@@ -57,7 +58,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> register() async {
+    if (isLoading) return; // éviter les double clics
+    
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      isLoading = true;
+      message = null;
+    });
 
     try {
       await _authRepository.register(
@@ -75,6 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
       
       setState(() {
         message = _kSuccessMessage;
+        isLoading = false;
       });
       
       Navigator.of(context).pushReplacementNamed('/home_page');
@@ -83,6 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
       
       setState(() {
         message = ErrorHelpers.extractErrorMessage(e);
+        isLoading = false;
       });
     }
   }
@@ -161,7 +171,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       // Bouton principal "S'inscrire"
                       PrimaryActionButtonWidget(
                         label: "S'inscrire",
-                        onPressed: register,
+                        onPressed: isLoading ? null : register,
+                        isLoading: isLoading,
                       ),
 
                       // Message éventuel
