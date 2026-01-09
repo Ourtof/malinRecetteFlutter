@@ -58,9 +58,14 @@ class AuthRepository {
     if (response.statusCode != 201) {
       throw _parseError(response);
     }
+
+    // connexion auto après inscription
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    await AuthService.saveToken(data['token'] as String);
+    await AuthService.saveUserData(data['user'] as Map<String, dynamic>);
   }
 
-  // Parse les erreurs de réponse
+  // parse les erreurs de réponse
   String _parseError(response) {
     // Gestion spécifique du rate limiting (429)
     if (response.statusCode == 429) {
@@ -75,7 +80,7 @@ class AuthRepository {
           }
         }
       } catch (_) {
-        // Si le parsing échoue, on retourne un message par défaut
+        // error si échec
       }
       return 'Trop de tentatives. Réessaie plus tard.';
     }
@@ -89,7 +94,7 @@ class AuthRepository {
           return 'Mot de passe invalide :\n${details.map((d) => '• $d').join('\n')}';
         }
         
-        // message simple - on vérifie 'error' AVANT 'message' car 'error' est plus spécifique
+        // message simple - on vérifie 'error' AVANT 'message'
         if (body['error'] is String) {
           return body['error'] as String;
         }
@@ -98,7 +103,7 @@ class AuthRepository {
         }
       }
     } catch (_) {
-      // corps non-JSON (HTML 500) → on ignore
+      // corps non-JSON (500), on ignore
     }
 
     if (response.statusCode == 401 || response.statusCode == 403) {
