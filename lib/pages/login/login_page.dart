@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
+import 'package:malinrecetteflutter/mixins/loading_mixin.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
@@ -15,11 +16,9 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with LoadingMixin {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  String? message;
-  bool isLoading = false;
   late final AuthRepository _authRepository;
 
   @override
@@ -33,10 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     if (isLoading) return;
     
-    setState(() {
-      isLoading = true;
-      message = null; // effacer les erreurs précédentes
-    });
+    startLoading();
 
     try {
       await _authRepository.login(
@@ -47,11 +43,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/home_page');
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        message = ErrorHelpers.extractErrorMessage(e);
-        isLoading = false;
-      });
+      setError(ErrorHelpers.extractErrorMessage(e));
     }
   }
 
@@ -128,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
 
                     // Message d'erreur stylé
-                    if (message != null && message!.isNotEmpty) ...[
+                    if (errorMessage != null && errorMessage!.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -150,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                message!,
+                                errorMessage!,
                                 style: const TextStyle(
                                   color: AppColors.error,
                                   fontSize: 13,

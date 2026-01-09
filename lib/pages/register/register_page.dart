@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:malinrecetteflutter/api/api_service_factory.dart';
+import 'package:malinrecetteflutter/mixins/loading_mixin.dart';
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/utils/form_validators.dart';
@@ -19,7 +20,7 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends State<RegisterPage> with LoadingMixin {
   // Contrôleurs de formulaire
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
@@ -31,9 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final villeController = TextEditingController();
   final codePostalController = TextEditingController();
 
-  // État
-  String? message;
-  bool isLoading = false;
+  String? successMessage;
   late final AuthRepository _authRepository;
 
   @override
@@ -62,10 +61,7 @@ class _RegisterPageState extends State<RegisterPage> {
     
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      isLoading = true;
-      message = null;
-    });
+    startLoading();
 
     try {
       await _authRepository.register(
@@ -82,18 +78,13 @@ class _RegisterPageState extends State<RegisterPage> {
       if (!mounted) return;
       
       setState(() {
-        message = _kSuccessMessage;
+        successMessage = _kSuccessMessage;
         isLoading = false;
       });
       
       Navigator.of(context).pushReplacementNamed('/home_page');
     } catch (e) {
-      if (!mounted) return;
-      
-      setState(() {
-        message = ErrorHelpers.extractErrorMessage(e);
-        isLoading = false;
-      });
+      setError(ErrorHelpers.extractErrorMessage(e));
     }
   }
 
@@ -120,7 +111,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Titre
                       Text(
                         "Créer un compte",
                         style: Theme.of(context).textTheme.headlineSmall
@@ -135,7 +125,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Champs
                       _input(
                         emailController,
                         'Email',
@@ -158,7 +147,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       const SizedBox(height: 16),
 
-                      // Lien "Déjà un compte ? Se connecter !"
                       TextButton(
                         onPressed: () => Navigator.of(
                           context,
@@ -168,18 +156,29 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       const SizedBox(height: 8),
 
-                      // Bouton principal "S'inscrire"
                       PrimaryActionButtonWidget(
                         label: "S'inscrire",
                         onPressed: isLoading ? null : register,
                         isLoading: isLoading,
                       ),
 
-                      // Message éventuel
-                      if (message != null) ...[
+                      // succès
+                      if (successMessage != null) ...[
                         const SizedBox(height: 16),
                         Text(
-                          message!,
+                          successMessage!,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      // error
+                      if (errorMessage != null && errorMessage!.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          errorMessage!,
                           style: const TextStyle(
                             color: AppColors.error,
                             fontSize: 16,
