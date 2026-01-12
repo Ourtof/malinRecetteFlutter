@@ -52,6 +52,8 @@ cf fichier lexik_jwt_authentification.yaml.
 
 - pour plus de sécurité, j'aurais pu me lancer dans les logs pour tracer.
 
+- Pour que ce soit plus pratique, je n'ai pas mis de mdp personnellement à cause des déco. Mais si qqn doit travailler avec moi, je lui créerai un utilisateur avec un mdp. Je ne l'ai jamais fait, mais je sais que c'est possible.
+
 
 RAF :
 - gérer cas d'erreur quand on change de mail dans la page edit et qu'on met un mail déjà existant
