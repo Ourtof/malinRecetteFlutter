@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// helpers pour le responsive
 class ResponsiveHelpers {
   static const double mobileBreakpoint = 600;
 
@@ -8,7 +7,7 @@ class ResponsiveHelpers {
     return MediaQuery.of(context).size.width < mobileBreakpoint;
   }
 
-  // retourne une valeur selon si on est sur mobile ou desktop
+  // retourne une valeur mobile ou desktop
   static T mobileOrDesktop<T>(
     BuildContext context,
     T mobileValue,
