@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
-// Classe pour stocker les requêtes en attente pendant un refresh token
+// class pour stocker les requête en attente pendant refresh token
 class _PendingRequest {
   final Completer<bool> completer;
   _PendingRequest({required this.completer});
@@ -20,13 +20,13 @@ class ApiService {
 
   ApiService({required this.baseUrl});
 
-  // Récupère le token JWT depuis SharedPreferences
+  // récupère le token JWT depuis SharedPreferences
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('jwt_token');
   }
 
-  // Rafraîchit le token automatiquement
+  // rafraîchi le token automatiquement
   Future<bool> _refreshTokenIfNeeded() async {
     // Si déjà en train de rafraîchir, on attend
     if (_isRefreshing) {
@@ -58,11 +58,11 @@ class ApiService {
           await AuthService.saveRefreshToken(data['refreshToken'] as String);
         }
         
-        // Réexécute les requêtes en attente
+        // éxécute les requête en attente
         _executePendingRequests();
         return true;
       } else {
-        // Refresh token invalide, on déconnecte
+        // refresh token invalide => on déconnecte
         await AuthService.logout();
         _rejectPendingRequests();
         return false;
@@ -75,7 +75,7 @@ class ApiService {
     }
   }
 
-  // Attend que le refresh soit terminé
+  // attend que le refresh soit terminé
   Future<bool> _waitForRefresh() async {
     final completer = Completer<bool>();
     _pendingRequests.add(_PendingRequest(completer: completer));
@@ -96,14 +96,14 @@ class ApiService {
     _pendingRequests.clear();
   }
 
-  // Gère les erreurs 401 en rafraîchissant automatiquement le token
+  // gère les erreurs 401 en rafraîchissant automatiquement le token
   Future<http.Response> _handleResponse(
     Future<http.Response> Function() requestFn, {
     required bool requiresAuth,
   }) async {
     var response = await requestFn();
 
-    // Si 401 et authentification requise, on essaie de rafraîchir
+    // si 401 et authentification requise, on essaie de rafraîchir
     if (response.statusCode == 401 && requiresAuth) {
       final refreshed = await _refreshTokenIfNeeded();
       
@@ -116,7 +116,7 @@ class ApiService {
     return response;
   }
 
-  // Construit les headers avec authentification si disponible
+  // construit les headers avec authentification si disponible
   Future<Map<String, String>> _buildHeaders({
     Map<String, String>? additionalHeaders,
     bool requiresAuth = false,
@@ -177,7 +177,7 @@ class ApiService {
     );
   }
 
-  // POST request avec données binaires (pour upload de fichiers)
+  // POST request pour upload de fichier
   Future<http.Response> postBinary(
     String endpoint, {
     required Uint8List bytes,
