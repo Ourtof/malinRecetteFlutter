@@ -1,15 +1,12 @@
-// Validateurs de formulaire réutilisables
-
-/// Expression régulière pour valider le format d'email
+// regex
 final emailRegex = RegExp(
   r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
 );
 
-/// Expression régulière pour valider le code postal (chiffres uniquement)
+// regex code postal
 final codePostalRegex = RegExp(r'^[0-9]+$');
 
-/// Valide une adresse email
-/// Retourne un message d'erreur si l'email est invalide, null sinon
+// return un message d'erreur si l'email est invalide
 String? validateEmail(String? value) {
   if (value == null || value.isEmpty) {
     return "L'email est requis";
@@ -22,8 +19,7 @@ String? validateEmail(String? value) {
   return null;
 }
 
-/// Valide un code postal
-/// Retourne un message d'erreur si le code postal est invalide, null sinon
+// retourne un message d'erreur si le code postal est invalide aussi
 String? validateCodePostal(String? value) {
   if (value == null || value.isEmpty) {
     return "Le code postal est requis";
