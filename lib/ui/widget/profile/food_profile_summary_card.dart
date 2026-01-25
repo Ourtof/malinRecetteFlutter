@@ -81,21 +81,19 @@ class FoodProfileSummaryCard extends StatelessWidget {
   }
 
   Widget _buildSummaryRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 90,
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(value, style: const TextStyle(color: AppColors.black)),
-        ),
-      ],
+          Text(value, style: const TextStyle(color: AppColors.black)),
+        ],
+      ),
     );
   }
 }
