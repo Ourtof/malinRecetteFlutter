@@ -104,6 +104,21 @@ class UserRepository {
     }
   }
 
+  // Supprime le profil de l'utilisateur connecté
+  Future<void> deleteProfile() async {
+    final response = await _apiService.delete(
+      '/api/user',
+      requiresAuth: true,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Erreur lors de la suppression du profil '
+        '(${response.statusCode}) : ${response.body}',
+      );
+    }
+  }
+
   // Parse les erreurs de réponse
   String _parseError(response) {
     // Gestion spécifique du rate limiting (429)

@@ -147,6 +147,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             label: 'Se déconnecter',
                             onPressed: logout,
                           ),
+                          const SizedBox(height: 16),
+                          PrimaryActionButtonWidget(
+                            label: 'Supprimer le profil',
+                            onPressed: _deleteProfile,
+                          ),
                         ],
                       ),
                     ),
@@ -313,5 +318,54 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
+  Future<void> _deleteProfile() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer le profil ?'),
+        content: const Text(
+          'Cette opération est définitive. Toutes tes données seront supprimées, '
+          'y compris ton profil alimentaire et tes recettes. '
+          'Es-tu sûr de vouloir supprimer ton profil ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await _userRepository.deleteProfile();
+
+      if (!mounted) return;
+
+      // Déconnexion après suppression
+      await AuthService.logout();
+
+      if (!mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      
+      SnackbarHelpers.showInfo(context, 'Profil supprimé avec succès');
+    } catch (e) {
+      if (!mounted) return;
+      SnackbarHelpers.showError(
+        context,
+        'Erreur : ${ErrorHelpers.extractErrorMessage(e)}',
+      );
+    }
   }
 }
