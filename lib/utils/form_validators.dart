@@ -19,7 +19,7 @@ String? validateEmail(String? value) {
   return null;
 }
 
-// retourne un message d'erreur si le code postal est invalide aussi
+// return un message d'erreur si le code postal est invalide aussi
 String? validateCodePostal(String? value) {
   if (value == null || value.isEmpty) {
     return "Le code postal est requis";
