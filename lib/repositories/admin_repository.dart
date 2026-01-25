@@ -8,7 +8,7 @@ class AdminRepository {
 
   AdminRepository({required ApiService apiService}) : _apiService = apiService;
 
-  // Récupère une liste paginée d'utilisateurs
+  // récupère une liste de user
   Future<PaginatedUsers> getUsers({
     String? search,
     int page = 1,
@@ -40,7 +40,7 @@ class AdminRepository {
     return PaginatedUsers.fromJson(jsonBody);
   }
 
-  // Active ou désactive un utilisateur
+  // active ou désactive un user
   Future<AdminUser> toggleUserEnabled(int userId, bool enabled) async {
     final response = await _apiService.patchJson(
       '/api/admin/user/$userId/toggle-enabled',
@@ -57,6 +57,23 @@ class AdminRepository {
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     return AdminUser.fromJson(data);
+  }
+
+  // récupère le profil d'un utilisateur
+  Future<Map<String, dynamic>> getUserProfile(int userId) async {
+    final response = await _apiService.get(
+      '/api/admin/user/$userId/profile',
+      requiresAuth: true,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Erreur lors de la récupération du profil '
+        '(${response.statusCode}) : ${response.body}',
+      );
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }
 

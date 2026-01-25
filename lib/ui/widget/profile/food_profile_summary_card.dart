@@ -10,7 +10,7 @@ class FoodProfileSummaryCard extends StatelessWidget {
   final bool isHalal;
   final String allergiesLabel;
   final bool isSaving;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
   const FoodProfileSummaryCard({
     super.key,
@@ -21,7 +21,7 @@ class FoodProfileSummaryCard extends StatelessWidget {
     required this.isHalal,
     required this.allergiesLabel,
     required this.isSaving,
-    required this.onEdit,
+    this.onEdit,
   });
 
   @override
@@ -55,23 +55,25 @@ class FoodProfileSummaryCard extends StatelessWidget {
                   _buildSummaryRow('Halal', isHalal ? 'Oui' : 'Non'),
                   const SizedBox(height: 8),
                   _buildSummaryRow('Allergies', allergiesLabel),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: OutlinedButton.icon(
-                      onPressed: isSaving ? null : onEdit,
-                      icon: isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.restaurant_menu, size: 18),
-                      label: Text(
-                        isSaving ? 'Enregistrement...' : 'Modifier le profil alimentaire',
+                  if (onEdit != null) ...[
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton.icon(
+                        onPressed: isSaving ? null : onEdit,
+                        icon: isSaving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.restaurant_menu, size: 18),
+                        label: Text(
+                          isSaving ? 'Enregistrement...' : 'Modifier le profil alimentaire',
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
       ),

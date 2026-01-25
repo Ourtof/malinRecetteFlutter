@@ -5,6 +5,7 @@ import 'package:malinrecetteflutter/utils/error_helpers.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_dialog.dart';
 import 'package:malinrecetteflutter/pages/profile/food_profile_edit_result.dart';
 import 'package:malinrecetteflutter/repositories/user_repository.dart';
+import 'package:malinrecetteflutter/repositories/admin_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 import 'package:malinrecetteflutter/ui/widget/buttons/primary_action_button_widget.dart';
 import 'package:malinrecetteflutter/ui/widget/error/error_message_card.dart';
@@ -17,7 +18,9 @@ import 'package:malinrecetteflutter/ui/widget/profile/profile_card.dart';
 import 'package:malinrecetteflutter/ui/widget/profile/profile_edit_button.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final int? userId;
+
+  const ProfilePage({super.key, this.userId});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -28,6 +31,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String? error;
   bool _isUpdating = false;
   late final UserRepository _userRepository;
+  AdminRepository? _adminRepository;
+  bool _isViewingOtherUser = false;
 
   // ---- Profil alimentaire ----
   bool _isLoadingFoodProfile = true;
@@ -47,6 +52,14 @@ class _ProfilePageState extends State<ProfilePage> {
     _userRepository = UserRepository(
       apiService: ApiServiceFactory.create(),
     );
+    
+    if (widget.userId != null) {
+      _isViewingOtherUser = true;
+      _adminRepository = AdminRepository(
+        apiService: ApiServiceFactory.create(),
+      );
+    }
+    
     loadProfile();
     loadFoodProfile();
   }
@@ -117,20 +130,22 @@ class _ProfilePageState extends State<ProfilePage> {
                             nom: user!['nom'] ?? '',
                             pseudo: user!['pseudo'] ?? '',
                           ),
-                          const SizedBox(height: 16),
-                          ProfileEditButton(
-                            isUpdating: _isUpdating,
-                            user: user!,
-                            onUpdate: (result) => _updateProfile(
-                              prenom: result.prenom,
-                              nom: result.nom,
-                              pseudo: result.pseudo,
-                              email: result.email,
-                              adresse: result.adresse,
-                              ville: result.ville,
-                              codePostal: result.codePostal,
+                          if (!_isViewingOtherUser) ...[
+                            const SizedBox(height: 16),
+                            ProfileEditButton(
+                              isUpdating: _isUpdating,
+                              user: user!,
+                              onUpdate: (result) => _updateProfile(
+                                prenom: result.prenom,
+                                nom: result.nom,
+                                pseudo: result.pseudo,
+                                email: result.email,
+                                adresse: result.adresse,
+                                ville: result.ville,
+                                codePostal: result.codePostal,
+                              ),
                             ),
-                          ),
+                          ],
                           const SizedBox(height: 24),
                           FoodProfileSummaryCard(
                             isLoading: _isLoadingFoodProfile,
@@ -140,18 +155,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             isHalal: _isHalal,
                             allergiesLabel: _allergiesLabel(),
                             isSaving: _isSavingFoodProfile,
-                            onEdit: _openFoodProfileDialog,
+                            onEdit: _isViewingOtherUser ? null : _openFoodProfileDialog,
                           ),
-                          const SizedBox(height: 32),
-                          PrimaryActionButtonWidget(
-                            label: 'Se déconnecter',
-                            onPressed: logout,
-                          ),
-                          const SizedBox(height: 16),
-                          PrimaryActionButtonWidget(
-                            label: 'Supprimer le profil',
-                            onPressed: _deleteProfile,
-                          ),
+                          if (!_isViewingOtherUser) ...[
+                            const SizedBox(height: 32),
+                            PrimaryActionButtonWidget(
+                              label: 'Se déconnecter',
+                              onPressed: logout,
+                            ),
+                            const SizedBox(height: 16),
+                            PrimaryActionButtonWidget(
+                              label: 'Supprimer le profil',
+                              onPressed: _deleteProfile,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -194,8 +211,46 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> loadProfile() async {
     try {
-      final profileData = await _userRepository.getProfile();
+      Map<String, dynamic> profileData;
+      
+      if (_isViewingOtherUser && widget.userId != null && _adminRepository != null) {
+        // Vérifier que l'utilisateur est admin
+        final isAdmin = await AuthService.isAdmin();
+        if (!isAdmin) {
+          setState(() => error = 'Accès refusé. Seuls les administrateurs peuvent voir les profils des autres utilisateurs.');
+          return;
+        }
+        
+        profileData = await _adminRepository!.getUserProfile(widget.userId!);
+      } else {
+        profileData = await _userRepository.getProfile();
+      }
+      
       setState(() => user = profileData);
+      
+      // Si on charge le profil d'un autre utilisateur, extraire le profil alimentaire des données
+      if (_isViewingOtherUser && profileData['foodProfile'] != null) {
+        final foodProfileData = profileData['foodProfile'] as Map<String, dynamic>;
+        setState(() {
+          _goalType = (foodProfileData['goalType'] as String?) ?? 'CLASSIQUE';
+          _dietType = (foodProfileData['dietType'] as String?) ?? 'CLASSIQUE';
+          _isHalal = (foodProfileData['isHalal'] as bool?) ?? false;
+          final rawAllergies = (foodProfileData['allergies'] as List?) ?? [];
+          _allergies = rawAllergies.map((e) => e.toString()).toSet();
+          _otherAllergiesController.text = (foodProfileData['autreAllergies'] as String?) ?? '';
+          _isLoadingFoodProfile = false;
+          _foodProfileError = null;
+        });
+      } else if (!_isViewingOtherUser) {
+        // Charger le profil alimentaire normalement pour l'utilisateur connecté
+        await loadFoodProfile();
+      } else {
+        // Pas de profil alimentaire pour l'utilisateur visualisé
+        setState(() {
+          _isLoadingFoodProfile = false;
+          _foodProfileError = null;
+        });
+      }
     } catch (e) {
       setState(() => error = ErrorHelpers.extractErrorMessage(e));
     }

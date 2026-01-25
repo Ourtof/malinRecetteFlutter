@@ -3,6 +3,7 @@ import 'package:malinrecetteflutter/models/admin_user.dart';
 import 'package:malinrecetteflutter/utils/color_helpers.dart';
 import 'package:malinrecetteflutter/ui/widget/admin/admin_user_status_chip.dart';
 import 'package:malinrecetteflutter/ui/widget/admin/admin_user_action_button.dart';
+import 'package:malinrecetteflutter/pages/profile/profile_page.dart';
 
 class AdminUserTable extends StatelessWidget {
   final List<AdminUser> users;
@@ -47,7 +48,7 @@ class AdminUserTable extends StatelessWidget {
               DataColumn(label: Text('Email')),
               DataColumn(label: Text('Rôles')),
               DataColumn(label: Text('Statut')),
-              DataColumn(label: Text('Action')),
+              DataColumn(label: Text('Actions')),
             ],
             rows: users.asMap().entries.map((entry) {
               final index = entry.key;
@@ -73,11 +74,33 @@ class AdminUserTable extends StatelessWidget {
                   DataCell(Text(user.email)),
                   DataCell(Text(user.roles.join(', '))),
                   DataCell(AdminUserStatusChip(enabled: user.enabled)),
-                  DataCell(AdminUserActionButton(
-                    user: user,
-                    isUpdating: isUpdating,
-                    onToggle: () => onToggleUser(user),
-                  )),
+                  DataCell(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.person, size: 20),
+                          tooltip: 'Voir le profil',
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ProfilePage(userId: user.id),
+                              ),
+                            );
+                          },
+                          style: IconButton.styleFrom(
+                            padding: const EdgeInsets.all(8),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        AdminUserActionButton(
+                          user: user,
+                          isUpdating: isUpdating,
+                          onToggle: () => onToggleUser(user),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               );
             }).toList(),
