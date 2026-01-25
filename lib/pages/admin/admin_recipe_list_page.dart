@@ -3,11 +3,9 @@ import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/models/admin_recipe.dart';
 import 'package:malinrecetteflutter/models/paginated_admin_recipes.dart';
 import 'package:malinrecetteflutter/repositories/admin_repository.dart';
-import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
-import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/utils/string_helpers.dart';
-import 'package:malinrecetteflutter/ui/widget/admin/admin_page_header.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_page_layout.dart';
 import 'package:malinrecetteflutter/ui/widget/admin/admin_recipe_list_content.dart';
 import 'package:malinrecetteflutter/pages/recipe/recipe_detail_page.dart';
 import 'package:malinrecetteflutter/pages/recipe/edit_recipe_page.dart';
@@ -116,39 +114,11 @@ class _AdminRecipeListPageState extends State<AdminRecipeListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const HeaderBar(height: 88),
-      bottomNavigationBar: const FooterWidget(),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1100),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AdminPageHeader(
-                  title: 'Gestion des recettes',
-                  description: "Vue d'ensemble des recettes et possibilités de gestion.",
-                  showBackButton: true,
-                ),
-                Expanded(
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: _buildTableContent(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return AdminPageLayout(
+      title: 'Gestion des recettes',
+      description: "Vue d'ensemble des recettes et possibilités de gestion.",
+      showBackButton: true,
+      content: _buildTableContent(),
     );
   }
 

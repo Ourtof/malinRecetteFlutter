@@ -3,11 +3,9 @@ import 'package:malinrecetteflutter/api/api_service_factory.dart';
 import 'package:malinrecetteflutter/models/admin_user.dart';
 import 'package:malinrecetteflutter/models/paginated_users.dart';
 import 'package:malinrecetteflutter/repositories/admin_repository.dart';
-import 'package:malinrecetteflutter/ui/widget/footer/footer_widget.dart';
-import 'package:malinrecetteflutter/ui/widget/header/header_bar.dart';
 import 'package:malinrecetteflutter/utils/snackbar_helpers.dart';
 import 'package:malinrecetteflutter/utils/string_helpers.dart';
-import 'package:malinrecetteflutter/ui/widget/admin/admin_page_header.dart';
+import 'package:malinrecetteflutter/ui/widget/admin/admin_page_layout.dart';
 import 'package:malinrecetteflutter/ui/widget/admin/admin_user_list_content.dart';
 
 class AdminUserListPage extends StatefulWidget {
@@ -84,39 +82,11 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const HeaderBar(height: 88),
-      bottomNavigationBar: const FooterWidget(),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1100),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AdminPageHeader(
-                  title: 'Gestion des utilisateurs',
-                  description: "Vue d'ensemble des comptes et de leur statut.",
-                  showBackButton: true,
-                ),
-                Expanded(
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: _buildTableContent(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return AdminPageLayout(
+      title: 'Gestion des utilisateurs',
+      description: "Vue d'ensemble des comptes et de leur statut.",
+      showBackButton: true,
+      content: _buildTableContent(),
     );
   }
 
