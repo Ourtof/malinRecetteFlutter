@@ -88,7 +88,9 @@ class HeaderNavigationItems extends StatelessWidget {
 
   Widget _buildMobileItem(BuildContext context, NavigationItem item) {
     return IconButton(
-      icon: Icon(item.icon, color: AppColors.black),
+      icon: Icon(item.icon, color: AppColors.black, size: 32),
+      iconSize: 28,
+      padding: const EdgeInsets.all(16),
       tooltip: item.label,
       onPressed: () {
         Navigator.of(context).pushNamed(item.route);
@@ -102,7 +104,10 @@ class HeaderNavigationItems extends StatelessWidget {
         icon: Icon(
           isLogged ? Icons.person : Icons.login,
           color: AppColors.black,
+          size: 32,
         ),
+        iconSize: 28,
+        padding: const EdgeInsets.all(16),
         tooltip: isLogged ? 'Profil' : 'Connexion',
         onPressed: () {
           Navigator.of(context).pushNamed(
