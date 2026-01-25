@@ -42,8 +42,8 @@ class HeaderNavigationItems extends StatelessWidget {
       icon: Icons.restaurant_menu,
     ),
     NavigationItem(
-      label: 'Administration',
-      route: '/admin/users',
+      label: 'Admin',
+      route: '/admin',
       icon: Icons.admin_panel_settings,
       requiresAdmin: true,
     ),

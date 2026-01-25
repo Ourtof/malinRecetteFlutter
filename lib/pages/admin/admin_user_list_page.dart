@@ -98,6 +98,7 @@ class _AdminUserListPageState extends State<AdminUserListPage> {
                 AdminPageHeader(
                   title: 'Gestion des utilisateurs',
                   description: "Vue d'ensemble des comptes et de leur statut.",
+                  showBackButton: true,
                 ),
                 Expanded(
                   child: Card(
