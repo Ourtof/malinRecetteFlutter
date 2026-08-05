@@ -43,3 +43,7 @@ cf lexik_jwt_authentification.yaml.
 - faire passer tous les tests
 
 - Créer un pipeline
+
+## Test
+
+- des tests créées avec phpUnit
