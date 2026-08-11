@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:malinrecetteflutter/repositories/recipe_repository.dart';
 import 'dart:typed_data';
 
-import '../fakes/fake_api_client.dart';
+import '../fake_api_client.dart';
 import '../helpers/api_test_helpers.dart';
 
 void main() {

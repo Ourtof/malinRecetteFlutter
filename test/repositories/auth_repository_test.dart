@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:malinrecetteflutter/repositories/auth_repository.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
-import '../fakes/fake_api_client.dart';
+import '../fake_api_client.dart';
 import '../helpers/api_test_helpers.dart';
 
 void main() {
