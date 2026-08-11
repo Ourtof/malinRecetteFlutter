@@ -2,11 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:malinrecetteflutter/utils/form_validators.dart';
 
 void main() {
-  test('validateEmail retourne une erreur si null', () {
+  test('validateEmail retourne une erreur si null ou vide', () {
     expect(validateEmail(null), "L'email est requis");
-  });
-
-  test('validateEmail retourne une erreur si vide', () {
     expect(validateEmail(''), "L'email est requis");
   });
 
@@ -20,11 +17,8 @@ void main() {
     expect(validateEmail('  user@example.fr  '), isNull);
   });
 
-  test('validateCodePostal retourne une erreur si null', () {
+  test('validateCodePostal retourne une erreur si null ou vide', () {
     expect(validateCodePostal(null), 'Le code postal est requis');
-  });
-
-  test('validateCodePostal retourne une erreur si vide', () {
     expect(validateCodePostal(''), 'Le code postal est requis');
   });
 
