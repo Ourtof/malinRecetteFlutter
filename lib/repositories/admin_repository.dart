@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/api/api_client.dart';
 import 'package:malinrecetteflutter/models/admin_user.dart';
 import 'package:malinrecetteflutter/models/paginated_users.dart';
 import 'package:malinrecetteflutter/models/admin_recipe.dart';
 import 'package:malinrecetteflutter/models/paginated_admin_recipes.dart';
 
 class AdminRepository {
-  final ApiService _apiService;
+  final ApiClient _apiService;
 
-  AdminRepository({required ApiService apiService}) : _apiService = apiService;
+  AdminRepository({required ApiClient apiService}) : _apiService = apiService;
 
   // récupère une liste de user
   Future<PaginatedUsers> getUsers({

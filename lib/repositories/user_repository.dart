@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/api/api_client.dart';
 
 // Repository pour la gestion des utilisateurs
 class UserRepository {
-  final ApiService _apiService;
+  final ApiClient _apiService;
 
-  UserRepository({required ApiService apiService}) : _apiService = apiService;
+  UserRepository({required ApiClient apiService}) : _apiService = apiService;
 
   // Récupère le profil de l'utilisateur connecté
   Future<Map<String, dynamic>> getProfile() async {

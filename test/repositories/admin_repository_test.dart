@@ -1,0 +1,150 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:malinrecetteflutter/repositories/admin_repository.dart';
+
+import '../fakes/fake_api_client.dart';
+import '../helpers/api_test_helpers.dart';
+
+void main() {
+  late AdminRepository repository;
+  late FakeApiClient api;
+
+  setUp(() {
+    initApiTests();
+    api = FakeApiClient();
+  });
+
+  group('AdminRepository.getUsers', () {
+    test('retourne une page d\'utilisateurs', () async {
+      api.onRequest = (request) async {
+        expect(request.endpoint, '/api/admin/user');
+        expect(request.queryParameters?['search'], 'admin');
+        return jsonResponse({
+          'items': [
+            {
+              'id': 1,
+              'email': 'admin@test.fr',
+              'pseudo': 'admin',
+              'roles': ['ROLE_ADMIN'],
+              'enabled': true,
+            },
+          ],
+          'total': 1,
+          'page': 1,
+          'limit': 20,
+        });
+      };
+
+      repository = AdminRepository(apiService: api);
+      final result = await repository.getUsers(search: 'admin');
+
+      expect(result.items.first.email, 'admin@test.fr');
+    });
+  });
+
+  group('AdminRepository.toggleUserEnabled', () {
+    test('active ou désactive un utilisateur', () async {
+      api.onRequest = (request) async {
+        expect(request.method, 'PATCH');
+        expect(request.endpoint, '/api/admin/user/5/toggle-enabled');
+        return jsonResponse({
+          'id': 5,
+          'email': 'u@test.fr',
+          'pseudo': 'user',
+          'roles': ['ROLE_USER'],
+          'enabled': false,
+        });
+      };
+
+      repository = AdminRepository(apiService: api);
+      final user = await repository.toggleUserEnabled(5, false);
+
+      expect(user.enabled, isFalse);
+    });
+  });
+
+  group('AdminRepository.getUserProfile', () {
+    test('retourne le profil d\'un utilisateur', () async {
+      api.onRequest = (request) async {
+        expect(request.endpoint, '/api/admin/user/2/profile');
+        return jsonResponse({'prenom': 'Marie', 'nom': 'Martin'});
+      };
+
+      repository = AdminRepository(apiService: api);
+      final profile = await repository.getUserProfile(2);
+
+      expect(profile['prenom'], 'Marie');
+    });
+  });
+
+  group('AdminRepository.getRecipes', () {
+    test('retourne une page de recettes admin', () async {
+      api.onRequest = (_) async {
+        return jsonResponse({
+          'items': [
+            {'id': 1, 'titre': 'Curry', 'contenu': 'Épicé'},
+          ],
+          'total': 1,
+          'page': 1,
+          'limit': 20,
+        });
+      };
+
+      repository = AdminRepository(apiService: api);
+      final result = await repository.getRecipes();
+
+      expect(result.items.first.titre, 'Curry');
+    });
+  });
+
+  group('AdminRepository.getRecipe', () {
+    test('retourne une recette admin par ID', () async {
+      api.onRequest = (request) async {
+        expect(request.endpoint, '/api/admin/recette/8');
+        return jsonResponse({
+          'id': 8,
+          'titre': 'Tajine',
+          'contenu': 'Parfumé',
+        });
+      };
+
+      repository = AdminRepository(apiService: api);
+      final recipe = await repository.getRecipe(8);
+
+      expect(recipe.titre, 'Tajine');
+    });
+  });
+
+  group('AdminRepository.updateRecipe', () {
+    test('met à jour une recette', () async {
+      api.onRequest = (request) async {
+        expect(request.method, 'PUT');
+        return jsonResponse({
+          'id': 8,
+          'titre': 'Tajine modifié',
+          'contenu': 'Nouveau contenu',
+        });
+      };
+
+      repository = AdminRepository(apiService: api);
+      final recipe = await repository.updateRecipe(8, {
+        'titre': 'Tajine modifié',
+        'contenu': 'Nouveau contenu',
+      });
+
+      expect(recipe.titre, 'Tajine modifié');
+    });
+  });
+
+  group('AdminRepository.deleteRecipe', () {
+    test('supprime une recette admin', () async {
+      api.onRequest = (request) async {
+        expect(request.endpoint, '/api/admin/recette/4');
+        return http.Response('', 204);
+      };
+
+      repository = AdminRepository(apiService: api);
+      await repository.deleteRecipe(4);
+    });
+  });
+}

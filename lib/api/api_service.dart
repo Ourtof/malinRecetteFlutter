@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:malinrecetteflutter/api/api_client.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
 // class pour stocker les requête en attente pendant refresh token
@@ -13,7 +14,7 @@ class _PendingRequest {
 
 // Service API de base pour les appels HTTP
 // Gère l'authentification automatique via token JWT et refresh automatique
-class ApiService {
+class ApiService implements ApiClient {
   final String baseUrl;
   bool _isRefreshing = false;
   final List<_PendingRequest> _pendingRequests = [];
@@ -137,6 +138,7 @@ class ApiService {
   }
 
   // GET request
+  @override
   Future<http.Response> get(
     String endpoint, {
     Map<String, String>? queryParameters,
@@ -155,6 +157,7 @@ class ApiService {
   }
 
   // POST request avec JSON
+  @override
   Future<http.Response> postJson(
     String endpoint, {
     Map<String, dynamic>? body,
@@ -178,6 +181,7 @@ class ApiService {
   }
 
   // POST request pour upload de fichier
+  @override
   Future<http.Response> postBinary(
     String endpoint, {
     required Uint8List bytes,
@@ -203,6 +207,7 @@ class ApiService {
   }
 
   // PUT request avec JSON
+  @override
   Future<http.Response> putJson(
     String endpoint, {
     Map<String, dynamic>? body,
@@ -226,6 +231,7 @@ class ApiService {
   }
 
   // PATCH request avec JSON
+  @override
   Future<http.Response> patchJson(
     String endpoint, {
     Map<String, dynamic>? body,
@@ -249,6 +255,7 @@ class ApiService {
   }
 
   // DELETE request
+  @override
   Future<http.Response> delete(
     String endpoint, {
     bool requiresAuth = false,
@@ -263,4 +270,3 @@ class ApiService {
     );
   }
 }
-

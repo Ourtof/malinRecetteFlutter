@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/api/api_client.dart';
 import 'package:malinrecetteflutter/models/paginated_recipes.dart';
 import 'package:malinrecetteflutter/models/recipe.dart';
 import 'package:malinrecetteflutter/models/recommended_recipe.dart';
@@ -9,9 +9,9 @@ import 'package:malinrecetteflutter/utils/tag_helpers.dart';
 // Repository pour la gestion des recettes
 // Sépare la logique métier des appels HTTP
 class RecipeRepository {
-  final ApiService _apiService;
+  final ApiClient _apiService;
 
-  RecipeRepository({required ApiService apiService})
+  RecipeRepository({required ApiClient apiService})
       : _apiService = apiService;
 
   // Récupère une liste paginée de recettes

@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:malinrecetteflutter/api/api_service.dart';
+import 'package:malinrecetteflutter/api/api_client.dart';
 import 'package:malinrecetteflutter/services/auth_service.dart';
 
 // Repository pour l'authentification
 class AuthRepository {
-  final ApiService _apiService;
+  final ApiClient _apiService;
 
-  AuthRepository({required ApiService apiService}) : _apiService = apiService;
+  AuthRepository({required ApiClient apiService}) : _apiService = apiService;
 
   // Connexion d'un utilisateur
   Future<void> login({
