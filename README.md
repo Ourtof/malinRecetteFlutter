@@ -24,7 +24,7 @@ Démarrer le serveur en --no-tls pour pas que le serveur se démarre en https al
 
 ***** compte *****
 
-compte user : user@test.com / User!1122
+compte user : user@test.fr / User!1122
 
 compte admin : admin@test.fr / Admin!1122
 
@@ -47,3 +47,5 @@ cf lexik_jwt_authentification.yaml.
 ## Test
 
 - des tests créées avec phpUnit
+
+- apiService pas testable. http.get(), http.post() à remplacer par du http.Client.
