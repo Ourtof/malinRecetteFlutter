@@ -21,7 +21,7 @@ void main() {
   test('fromJson applique les valeurs par défaut pour champs manquants', () {
     final user = AdminUser.fromJson({'id': 2});
 
-    expect(user.email, '1');
+    expect(user.email, '');
     expect(user.pseudo, '');
     expect(user.roles, isEmpty);
     expect(user.enabled, isFalse);

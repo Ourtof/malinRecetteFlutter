@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Installer Flutter
         uses: subosito/flutter-action@v2
@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Installer Flutter
         uses: subosito/flutter-action@v2
@@ -52,7 +52,7 @@ jobs:
         run: flutter build web --release
 
       - name: Créer l'artifact de déploiement
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v5
         with:
           name: malinrecette-frontend
           path: build/web/
