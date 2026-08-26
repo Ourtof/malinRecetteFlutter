@@ -3,11 +3,11 @@ name: Tests Flutter
 on:
   push:
     branches:
-      - pipeline
+      - dev
 
   pull_request:
     branches:
-      - pipeline
+      - dev
 
 jobs:
   tests:
