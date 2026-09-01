@@ -6,70 +6,72 @@ void main() {
       '{code: GLUTEN, contenu: Contient gluten, categorie: ALLERGENE}';
 
   test('extractTagCode extrait le code depuis le format raw', () {
-    // When
+    // Given : un tag au format brut renvoyé par le backend
+    // When : on extrait le code
     final result = TagHelpers.extractTagCode(rawTag);
 
-    // Then
+    // Then : le code GLUTEN est isolé
     expect(result, 'GLUTEN');
   });
 
   test('extractTagCode retourne la chaîne brute si pas de marqueur code:', () {
-    // Given
+    // Given : une chaîne qui n'a pas le format attendu
     const simple = 'SIMPLE_TAG';
 
-    // When
+    // When : on tente d'en extraire le code
     final result = TagHelpers.extractTagCode(simple);
 
-    // Then
+    // Then : la chaîne est retournée telle quelle
     expect(result, 'SIMPLE_TAG');
   });
 
   test('formatTagLabel extrait le contenu depuis le format raw', () {
-    // When
+    // Given : le même tag au format brut
+    // When : on formate son libellé
     final result = TagHelpers.formatTagLabel(rawTag);
 
-    // Then
+    // Then : le contenu lisible est extrait
     expect(result, 'Contient gluten');
   });
 
   test('formatTagLabel retourne la chaîne brute si pas de contenu:', () {
-    // Given
+    // Given : une chaîne sans le marqueur "contenu:"
     const simple = 'SIMPLE_TAG';
 
-    // When
+    // When : on tente de formater son libellé
     final result = TagHelpers.formatTagLabel(simple);
 
-    // Then
+    // Then : la chaîne est retournée telle quelle
     expect(result, 'SIMPLE_TAG');
   });
 
   test('isObjectifTag détecte un tag OBJECTIF avec ou sans espace', () {
-    // Given
+    // Given : deux tags de catégorie OBJECTIF (avec puis sans espace après ':'), et un tag ALLERGENE
     const avecEspace = '{code: X, categorie: OBJECTIF}';
     const sansEspace = '{code: X, categorie:OBJECTIF}';
 
-    // When
+    // When : on vérifie la catégorie de chacun
     final resultAvecEspace = TagHelpers.isObjectifTag(avecEspace);
     final resultSansEspace = TagHelpers.isObjectifTag(sansEspace);
     final resultAllergene = TagHelpers.isObjectifTag(rawTag);
 
-    // Then
+    // Then : seuls les deux premiers sont détectés comme OBJECTIF
     expect(resultAvecEspace, isTrue);
     expect(resultSansEspace, isTrue);
     expect(resultAllergene, isFalse);
   });
 
   test('isAllergeneTag détecte un tag ALLERGENE avec ou sans espace', () {
-    // Given
+    // Given : un tag ALLERGENE (avec espace, via rawTag), un tag ALLERGENE (sans espace), et un tag OBJECTIF
     const sansEspace = '{code: X, categorie:ALLERGENE}';
     const objectif = '{code: X, categorie: OBJECTIF}';
 
-    // When
+    // When : on vérifie la catégorie de chacun
     final resultAvecEspace = TagHelpers.isAllergeneTag(rawTag);
     final resultSansEspace = TagHelpers.isAllergeneTag(sansEspace);
     final resultObjectif = TagHelpers.isAllergeneTag(objectif);
 
-    // Then
+    // Then : seuls les deux premiers sont détectés comme ALLERGENE
     expect(resultAvecEspace, isTrue);
     expect(resultSansEspace, isTrue);
     expect(resultObjectif, isFalse);

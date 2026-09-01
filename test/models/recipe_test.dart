@@ -12,6 +12,7 @@ void main() {
   };
 
   test('fromJson parse une recette complète avec tags en liste', () {
+    // Given
     final json = {
       ...baseJson,
       'tags': [
@@ -19,8 +20,10 @@ void main() {
       ],
     };
 
+    // When
     final recipe = Recipe.fromJson(json);
 
+    // Then
     expect(recipe.id, 1);
     expect(recipe.titre, 'Tarte aux pommes');
     expect(recipe.contenu, 'Une délicieuse tarte');
@@ -32,6 +35,7 @@ void main() {
   });
 
   test('fromJson parse les tags au format map', () {
+    // Given
     final json = {
       ...baseJson,
       'tags': {
@@ -40,24 +44,40 @@ void main() {
       },
     };
 
+    // When
     final recipe = Recipe.fromJson(json);
 
+    // Then
     expect(recipe.tags, hasLength(2));
     expect(recipe.tags.map((t) => t.contenu), containsAll(['Dessert', 'Végétarien']));
   });
 
   test('fromJson retourne une liste vide si tags null ou format inconnu', () {
-    expect(Recipe.fromJson({...baseJson, 'tags': null}).tags, isEmpty);
-    expect(Recipe.fromJson({...baseJson, 'tags': 'invalid'}).tags, isEmpty);
+    // Given
+    final jsonTagsNull = {...baseJson, 'tags': null};
+    final jsonTagsInvalid = {...baseJson, 'tags': 'invalid'};
+
+    // When
+    final recipeTagsNull = Recipe.fromJson(jsonTagsNull);
+    final recipeTagsInvalid = Recipe.fromJson(jsonTagsInvalid);
+
+    // Then
+    expect(recipeTagsNull.tags, isEmpty);
+    expect(recipeTagsInvalid.tags, isEmpty);
   });
 
   test('fromJson gère les champs optionnels absents', () {
-    final recipe = Recipe.fromJson({
+    // Given
+    final json = {
       'id': 5,
       'titre': 'Salade',
       'contenu': 'Simple',
-    });
+    };
 
+    // When
+    final recipe = Recipe.fromJson(json);
+
+    // Then
     expect(recipe.dateRecette, isNull);
     expect(recipe.auteur, isNull);
     expect(recipe.illustration, isNull);

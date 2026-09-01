@@ -13,13 +13,18 @@ void main() {
   };
 
   test('fromJson parse une recette admin avec tags et allergies', () {
-    final recipe = AdminRecipe.fromJson({
+    // Given
+    final json = {
       ...baseJson,
       'tags': [
         {'id': 1, 'contenu': 'Plat principal'},
       ],
-    });
+    };
 
+    // When
+    final recipe = AdminRecipe.fromJson(json);
+
+    // Then
     expect(recipe.id, 1);
     expect(recipe.titre, 'Curry');
     expect(recipe.allergies, ['GLUTEN', 'LAIT']);
@@ -27,17 +32,23 @@ void main() {
   });
 
   test('fromJson parse les tags au format map', () {
-    final recipe = AdminRecipe.fromJson({
+    // Given
+    final json = {
       ...baseJson,
       'tags': {
         'a': {'id': 1, 'contenu': 'Épicé'},
       },
-    });
+    };
 
+    // When
+    final recipe = AdminRecipe.fromJson(json);
+
+    // Then
     expect(recipe.tags.first.contenu, 'Épicé');
   });
 
   test('copyWith remplace uniquement les champs fournis', () {
+    // Given
     const original = AdminRecipe(
       id: 1,
       titre: 'Ancien',
@@ -45,8 +56,10 @@ void main() {
       allergies: ['GLUTEN'],
     );
 
+    // When
     final updated = original.copyWith(titre: 'Nouveau');
 
+    // Then
     expect(updated.titre, 'Nouveau');
     expect(updated.contenu, 'Contenu');
     expect(updated.allergies, ['GLUTEN']);

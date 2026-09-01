@@ -5,7 +5,8 @@ import 'package:malinrecetteflutter/models/paginated_admin_recipes.dart';
 
 void main() {
   test('PaginatedRecipes.fromJson parse une page de recettes', () {
-    final result = PaginatedRecipes.fromJson({
+    // Given
+    final json = {
       'items': [
         {
           'id': 1,
@@ -16,8 +17,12 @@ void main() {
       'total': 1,
       'page': 1,
       'limit': 10,
-    });
+    };
 
+    // When
+    final result = PaginatedRecipes.fromJson(json);
+
+    // Then
     expect(result.items, hasLength(1));
     expect(result.items.first.titre, 'Soupe');
     expect(result.total, 1);
@@ -26,18 +31,24 @@ void main() {
   });
 
   test('PaginatedRecipes.fromJson retourne une liste vide si items absent', () {
-    final result = PaginatedRecipes.fromJson({
+    // Given
+    final json = {
       'items': null,
       'total': 0,
       'page': 1,
       'limit': 10,
-    });
+    };
 
+    // When
+    final result = PaginatedRecipes.fromJson(json);
+
+    // Then
     expect(result.items, isEmpty);
   });
 
   test('PaginatedUsers.fromJson parse une page d\'utilisateurs', () {
-    final result = PaginatedUsers.fromJson({
+    // Given
+    final json = {
       'items': [
         {
           'id': 1,
@@ -50,8 +61,12 @@ void main() {
       'total': 42,
       'page': 2,
       'limit': 20,
-    });
+    };
 
+    // When
+    final result = PaginatedUsers.fromJson(json);
+
+    // Then
     expect(result.items, hasLength(1));
     expect(result.items.first.email, 'u@test.fr');
     expect(result.total, 42);
@@ -59,7 +74,8 @@ void main() {
   });
 
   test('PaginatedAdminRecipes.fromJson parse une page de recettes admin', () {
-    final result = PaginatedAdminRecipes.fromJson({
+    // Given
+    final json = {
       'items': [
         {
           'id': 7,
@@ -70,8 +86,12 @@ void main() {
       'total': 7,
       'page': 1,
       'limit': 20,
-    });
+    };
 
+    // When
+    final result = PaginatedAdminRecipes.fromJson(json);
+
+    // Then
     expect(result.items, hasLength(1));
     expect(result.items.first.titre, 'Risotto');
     expect(result.total, 7);

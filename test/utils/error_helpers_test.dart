@@ -3,16 +3,24 @@ import 'package:malinrecetteflutter/utils/error_helpers.dart';
 
 void main() {
   test('extractErrorMessage retire le préfixe Exception:', () {
-    expect(
-      ErrorHelpers.extractErrorMessage(Exception('Email invalide')),
-      'Email invalide',
-    );
+    // Given
+    final error = Exception('Email invalide');
+
+    // When
+    final result = ErrorHelpers.extractErrorMessage(error);
+
+    // Then
+    expect(result, 'Email invalide');
   });
 
   test('extractErrorMessage retourne la chaîne telle quelle sans préfixe', () {
-    expect(
-      ErrorHelpers.extractErrorMessage('Erreur réseau'),
-      'Erreur réseau',
-    );
+    // Given
+    const error = 'Erreur réseau';
+
+    // When
+    final result = ErrorHelpers.extractErrorMessage(error);
+
+    // Then
+    expect(result, 'Erreur réseau');
   });
 }
