@@ -16,22 +16,34 @@ void main() {
 
   group('AuthRepository.login', () {
     test('stocke le token et les données utilisateur en cas de succès', () async {
-      api.onRequest = (request) async {
-        expect(request.endpoint, '/api/login');
-        return jsonResponse({
-          'token': 'jwt-abc',
-          'refreshToken': 'refresh-abc',
-          'user': {'id': 1, 'email': 'u@test.fr', 'roles': ['ROLE_USER']},
-        });
-      };
+  // Given
+  api.onRequest = (request) async {
+    expect(request.endpoint, '/api/login');
 
-      repository = AuthRepository(apiService: api);
-      await repository.login(email: '  u@test.fr  ', password: 'secret');
-
-      expect(await AuthService.getToken(), 'jwt-abc');
-      expect(await AuthService.getRefreshToken(), 'refresh-abc');
-      expect(await AuthService.isLoggedIn(), isTrue);
+    return jsonResponse({
+      'token': 'jwt-abc',
+      'refreshToken': 'refresh-abc',
+      'user': {
+        'id': 1,
+        'email': 'u@test.fr',
+        'roles': ['ROLE_USER'],
+      },
     });
+  };
+
+  repository = AuthRepository(apiService: api);
+
+  // When
+  await repository.login(
+    email: ' u@test.fr ',
+    password: 'secret',
+  );
+
+  // Then
+  expect(await AuthService.getToken(), 'jwt-abc');
+  expect(await AuthService.getRefreshToken(), 'refresh-abc');
+  expect(await AuthService.isLoggedIn(), isTrue);
+});
 
     test('lève une erreur avec message 401', () async {
       api.onRequest = (_) async => http.Response('', 401);
