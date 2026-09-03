@@ -15,6 +15,7 @@ void main() {
 
   group('UserRepository.getProfile', () {
     test('retourne le profil utilisateur', () async {
+      // Given
       api.onRequest = (request) async {
         expect(request.endpoint, '/api/user');
         return jsonResponse({
@@ -23,30 +24,36 @@ void main() {
           'prenom': 'Paul',
         });
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       final profile = await repository.getProfile();
 
+      // Then
       expect(profile['pseudo'], 'gourmand');
     });
 
     test('lève une exception en cas d\'erreur', () async {
+      // Given
       api.onRequest = (_) async => http.Response('erreur', 500);
       repository = UserRepository(apiService: api);
 
+      // Then
       expect(() => repository.getProfile(), throwsA(isA<Exception>()));
     });
   });
 
   group('UserRepository.updateProfile', () {
     test('met à jour le profil et retourne les données', () async {
+      // Given
       api.onRequest = (request) async {
         expect(request.body?['pseudo'], 'nouveau_pseudo');
         expect(request.body?.containsKey('password'), isFalse);
         return jsonResponse({'pseudo': 'nouveau_pseudo'});
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       final result = await repository.updateProfile(
         prenom: 'Paul',
         nom: 'Martin',
@@ -57,16 +64,20 @@ void main() {
         codePostal: '69001',
       );
 
+      // Then
       expect(result['pseudo'], 'nouveau_pseudo');
     });
 
     test('inclut le mot de passe s\'il est fourni', () async {
+      // Given
+      Map<String, dynamic>? sentBody;
       api.onRequest = (request) async {
-        expect(request.body?['password'], 'NewPass1!');
+        sentBody = request.body;
         return jsonResponse({'ok': true});
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       await repository.updateProfile(
         prenom: 'Paul',
         nom: 'Martin',
@@ -77,15 +88,19 @@ void main() {
         ville: 'Lyon',
         codePostal: '69001',
       );
+
+      // Then
+      expect(sentBody?['password'], 'NewPass1!');
     });
 
     test('lève le message d\'erreur parsé pour un 429', () async {
+      // Given
       api.onRequest = (_) async {
         return jsonResponse({'error': 'Trop de requêtes'}, statusCode: 429);
       };
-
       repository = UserRepository(apiService: api);
 
+      // Then
       expect(
         () => repository.updateProfile(
           prenom: 'Paul',
@@ -103,6 +118,7 @@ void main() {
 
   group('UserRepository.getFoodProfile', () {
     test('retourne le profil alimentaire', () async {
+      // Given
       api.onRequest = (request) async {
         expect(request.endpoint, '/api/me/food-profile');
         return jsonResponse({
@@ -111,24 +127,27 @@ void main() {
           'isHalal': false,
         });
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       final profile = await repository.getFoodProfile();
 
+      // Then
       expect(profile['dietType'], 'VEGETARIEN');
     });
   });
 
   group('UserRepository.updateFoodProfile', () {
     test('envoie les allergies et le profil alimentaire', () async {
+      // Given
+      Map<String, dynamic>? sentBody;
       api.onRequest = (request) async {
-        expect(request.body?['goalType'], 'MAINTIEN');
-        expect(request.body?['allergies'], ['GLUTEN', 'LAIT']);
-        expect(request.body?['autreAllergies'], 'Kiwi');
+        sentBody = request.body;
         return jsonResponse({'ok': true});
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       await repository.updateFoodProfile(
         goalType: 'MAINTIEN',
         dietType: 'OMNIVORE',
@@ -136,19 +155,32 @@ void main() {
         allergies: {'GLUTEN', 'LAIT'},
         otherAllergies: '  Kiwi  ',
       );
+
+      // Then
+      expect(sentBody?['goalType'], 'MAINTIEN');
+      expect(sentBody?['allergies'], ['GLUTEN', 'LAIT']);
+      expect(sentBody?['autreAllergies'], 'Kiwi');
     });
   });
 
   group('UserRepository.deleteProfile', () {
     test('supprime le profil sans erreur', () async {
+      // Given
+      String? calledMethod;
+      String? calledEndpoint;
       api.onRequest = (request) async {
-        expect(request.method, 'DELETE');
-        expect(request.endpoint, '/api/user');
+        calledMethod = request.method;
+        calledEndpoint = request.endpoint;
         return jsonResponse({'ok': true});
       };
-
       repository = UserRepository(apiService: api);
+
+      // When
       await repository.deleteProfile();
+
+      // Then
+      expect(calledMethod, 'DELETE');
+      expect(calledEndpoint, '/api/user');
     });
   });
 }

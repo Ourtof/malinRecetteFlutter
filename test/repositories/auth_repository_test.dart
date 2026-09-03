@@ -16,39 +16,34 @@ void main() {
 
   group('AuthRepository.login', () {
     test('stocke le token et les données utilisateur en cas de succès', () async {
-  // Given
-  api.onRequest = (request) async {
-    expect(request.endpoint, '/api/login');
 
-    return jsonResponse({
-      'token': 'jwt-abc',
-      'refreshToken': 'refresh-abc',
-      'user': {
-        'id': 1,
-        'email': 'u@test.fr',
-        'roles': ['ROLE_USER'],
-      },
+      // Given
+      api.onRequest = (request) async {
+        expect(request.endpoint, '/api/login');
+        return jsonResponse({
+          'token': 'jwt-abc',
+          'refreshToken': 'refresh-abc',
+          'user': {'id': 1, 'email': 'u@test.fr', 'roles': ['ROLE_USER']},
+        });
+      };
+      repository = AuthRepository(apiService: api);
+
+      // When
+      await repository.login(email: '  u@test.fr  ', password: 'secret');
+
+      // Then
+      expect(await AuthService.getToken(), 'jwt-abc');
+      expect(await AuthService.getRefreshToken(), 'refresh-abc');
+      expect(await AuthService.isLoggedIn(), isTrue);
     });
-  };
-
-  repository = AuthRepository(apiService: api);
-
-  // When
-  await repository.login(
-    email: ' u@test.fr ',
-    password: 'secret',
-  );
-
-  // Then
-  expect(await AuthService.getToken(), 'jwt-abc');
-  expect(await AuthService.getRefreshToken(), 'refresh-abc');
-  expect(await AuthService.isLoggedIn(), isTrue);
-});
 
     test('lève une erreur avec message 401', () async {
+
+      // Given
       api.onRequest = (_) async => http.Response('', 401);
       repository = AuthRepository(apiService: api);
 
+      // Then
       expect(
         () => repository.login(email: 'u@test.fr', password: 'wrong'),
         throwsA('Email ou mot de passe incorrect.'),
@@ -56,15 +51,17 @@ void main() {
     });
 
     test('formate les erreurs de mot de passe avec détails', () async {
+
+      // Given
       api.onRequest = (_) async {
         return jsonResponse({
           'error': 'Mot de passe invalide',
           'details': ['Trop court', 'Pas de chiffre'],
         }, statusCode: 400);
       };
-
       repository = AuthRepository(apiService: api);
 
+      // Then
       expect(
         () => repository.login(email: 'u@test.fr', password: 'x'),
         throwsA(
@@ -76,6 +73,8 @@ void main() {
 
   group('AuthRepository.register', () {
     test('connecte automatiquement après inscription', () async {
+
+      // Given
       api.onRequest = (request) async {
         expect(request.endpoint, '/api/register');
         return jsonResponse({
@@ -83,8 +82,9 @@ void main() {
           'user': {'id': 2, 'email': 'new@test.fr'},
         }, statusCode: 201);
       };
-
       repository = AuthRepository(apiService: api);
+
+      // When
       await repository.register(
         email: 'new@test.fr',
         password: 'Password1!',
@@ -96,6 +96,7 @@ void main() {
         codePostal: '75001',
       );
 
+      // Then
       expect(await AuthService.getToken(), 'jwt-new');
       expect(await AuthService.isLoggedIn(), isTrue);
     });
@@ -103,8 +104,9 @@ void main() {
 
   group('AuthRepository.refreshToken', () {
     test('met à jour le token JWT', () async {
-      await AuthService.saveRefreshToken('old-refresh');
 
+      // Given
+      await AuthService.saveRefreshToken('old-refresh');
       api.onRequest = (request) async {
         expect(request.endpoint, '/api/refresh');
         return jsonResponse({
@@ -112,17 +114,22 @@ void main() {
           'refreshToken': 'refresh-refreshed',
         });
       };
-
       repository = AuthRepository(apiService: api);
+
+      // When
       await repository.refreshToken();
 
+      // Then
       expect(await AuthService.getToken(), 'jwt-refreshed');
       expect(await AuthService.getRefreshToken(), 'refresh-refreshed');
     });
 
     test('lève une exception si aucun refresh token', () async {
+
+      // Given
       repository = AuthRepository(apiService: api);
 
+      // Then
       expect(
         () => repository.refreshToken(),
         throwsA(isA<Exception>()),
@@ -130,12 +137,14 @@ void main() {
     });
 
     test('déconnecte l\'utilisateur si le refresh échoue', () async {
+      
+      // Given
       await AuthService.saveRefreshToken('bad-refresh');
       await AuthService.saveToken('old-jwt');
-
       api.onRequest = (_) async => http.Response('', 401);
       repository = AuthRepository(apiService: api);
 
+      // Then
       await expectLater(
         repository.refreshToken(),
         throwsA('Email ou mot de passe incorrect.'),

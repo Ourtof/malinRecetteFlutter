@@ -42,10 +42,10 @@ cf lexik_jwt_authentification.yaml.
 
 - faire passer tous les tests
 
-- Créer un pipeline
+- Améliorer le pipeline : automatiser l'envoie par FTP vers l'hébergement
 
 ## Test
 
-- des tests créées avec phpUnit
+- des tests créées avec phpUnit et flutter test
 
 - apiService pas testable. http.get(), http.post() à remplacer par du http.Client.

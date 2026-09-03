@@ -4,29 +4,35 @@ import 'package:malinrecetteflutter/ui/widget/error/error_message_card.dart';
 
 void main() {
   testWidgets('ErrorMessageCard affiche le message simple', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: ErrorMessageCard(message: 'Email invalide'),
-        ),
+    // Given
+    const widget = MaterialApp(
+      home: Scaffold(
+        body: ErrorMessageCard(message: 'Email invalide'),
       ),
     );
 
+    // When
+    await tester.pumpWidget(widget);
+
+    // Then
     expect(find.text('Email invalide'), findsOneWidget);
     expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
   });
 
   testWidgets('ErrorMessageCard affiche titre et détails sur plusieurs lignes', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: ErrorMessageCard(
-            message: 'Mot de passe invalide :\n• Trop court\n• Pas de chiffre',
-          ),
+    // Given
+    const widget = MaterialApp(
+      home: Scaffold(
+        body: ErrorMessageCard(
+          message: 'Mot de passe invalide :\n• Trop court\n• Pas de chiffre',
         ),
       ),
     );
 
+    // When
+    await tester.pumpWidget(widget);
+
+    // Then
     expect(find.text('Mot de passe invalide :'), findsOneWidget);
     expect(find.text('• Trop court'), findsOneWidget);
     expect(find.text('• Pas de chiffre'), findsOneWidget);
