@@ -50,7 +50,7 @@ jobs:
         run: flutter build web --release
 
       - name: Créer l'artifact de déploiement
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: malinrecette-frontend
           path: build/web/
