@@ -26,7 +26,7 @@ cf lexik_jwt_authentification.yaml.
 
 ## Test
 
-- des tests créées avec phpUnit et flutter test et phpUnit.
+- des tests créées avec phpUnit et flutter test.
 
 - apiService pas testable. http.get(), http.post() à remplacer par du http.Client.
 
